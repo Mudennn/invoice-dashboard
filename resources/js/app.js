@@ -1,0 +1,14 @@
+import './bootstrap';
+import '../sass/app.scss';
+
+import * as bootstrap from 'bootstrap';
+window.bootstrap = bootstrap; // Make bootstrap globally available
+
+import jQuery from 'jquery';
+window.$ = window.jQuery = jQuery;
+
+// Import DataTable and initialize it with jQuery
+import DataTable from 'datatables.net-bs5';
+import 'datatables.net-buttons-bs5'
+import 'datatables.net-responsive-bs5'
+DataTable(window, $);

@@ -1,0 +1,198 @@
+<style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@100..900&display=swap');
+
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+        font-family: "Inter", serif;
+    }
+
+    html,
+    body {
+        scroll-behavior: smooth;
+        height: 100%;
+    }
+
+    body {
+        background-color: var(--background) !important;
+        color: black;
+    }
+
+    /* Variables */
+    :root {
+        --background: #f2f5ff;
+        --foreground: white;
+        --primary: #092276;
+        --secondary: #1c1c1c;
+        --button-gradient-start: #2F68FF;
+        --button-gradient-end: #16327A;
+
+        --tertiary: #1be3c2;
+        --tertiary-foreground: #1be3c233;
+
+        --quaternary: #efb54b;
+        --quaternary-foreground: rgb(239, 181, 75, 0.2);
+
+        --muted: #acacac;
+
+        --destructive: #e7000b;
+
+        --border: #E5E5E5;
+        /*
+        --text-color: #165235;
+        --sub-text-color: #898989;
+        --primary-button-color: #45CE7D;
+        --secondary-button-color: #E5FC0B;
+        --main-bg-color: #FEF6E7;
+        --red-color: #C83000;
+        --yellow-color: #FBBC05;
+        --third-color: #E4D5C7; */
+
+        --thirty-two: 2rem;
+        --twenty-four: 1.5rem;
+        --twenty-one: 1.313rem;
+        --eighteen: 1.125rem;
+        --sixteen: 1rem;
+        --fourteen: 0.875rem;
+        --twelve: 0.75rem;
+        --eleven: 0.688rem;
+    }
+
+    h1 {
+        font-size: 4rem !important;
+        font-weight: 400 !important;
+        color: var(--primary) !important;
+        margin-bottom: 0 !important;
+    }
+
+    h2 {
+        font-size: 1.5rem !important;
+        font-weight: 700 !important;
+        color: var(--primary) !important;
+        margin-bottom: 0 !important;
+    }
+
+    h3 {
+        font-size: var(--eighteen) !important;
+        font-weight: 600 !important;
+        color: var(--secondary) !important;
+        margin-bottom: 0 !important;
+    }
+
+    h4 {
+        font-size: 1rem !important;
+        font-weight: 300 !important;
+        margin-bottom: 0 !important;
+        color: var(--primary) !important;
+    }
+
+    h6 {
+        font-size: 0.875rem !important;
+        font-weight: 500 !important;
+        margin-bottom: 0 !important;
+        color: var(--primary) !important;
+    }
+
+
+    p {
+        font-size: 0.875rem !important;
+        color: var(--secondary) !important;
+        margin-bottom: 0px !important;
+        line-height: 1.5 !important;
+        font-weight: 400 !important;
+    }
+
+    hr {
+        border-top: 1px var(--border) solid !important;
+        color: var(--border) !important;
+        margin: 0 !important;
+        opacity: 1 !important;
+    }
+
+    a {
+        font-size: 0.875rem !important;
+        text-decoration: none !important;
+        margin-bottom: 0 !important;
+        color: var(--primary) !important;
+        transition: all 0.3s !important;
+
+        &:hover {
+            color: var(--secondary) !important;
+        }
+    }
+
+    .sub-text {
+        color: var(--muted) !important;
+    }
+
+    /* Main layout structure */
+    .wrapper {
+        display: flex;
+        height: 100vh;
+        width: 100%;
+        overflow: hidden;
+        position: relative;
+    }
+
+    .main-content {
+        flex: 1;
+        background-color: white;
+        margin: 16px;
+        border-radius: 16px;
+        overflow-y: auto;
+        position: relative;
+    }
+
+
+    /* BUTTONS */
+    .primary-button {
+        background: linear-gradient(to top, var(--button-gradient-start), var(--button-gradient-end));
+        padding: 2px 32px !important;
+        border-radius: 4px !important;
+        font-weight: 400 !important;
+        font-size: var(--sixteen) !important;
+        transition: all 0.3s !important;
+        color: white !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+
+        &:hover {
+            color: white !important;
+        }
+    }
+
+    .outline-button {
+        background-color: white !important;
+        color: var(--primary) !important;
+        border: 1px solid var(--primary) !important;
+        padding: 2px 32px !important;
+        border-radius: 4px !important;
+    }
+
+    .btn-outline-primary {
+        --bs-btn-border-color: var(--primary) !important;
+    }
+
+    .btn-check:checked + .btn{
+        background-color: var(--primary) !important;
+        border-color: var(--primary) !important;
+        color: white !important;
+    }
+
+    /* Mobile styles */
+    @media only screen and (max-width: 767px) {
+        .main-content {
+            margin: 0;
+        }
+    }
+
+    /* Tablet styles */
+    @media (min-width: 768px) and (max-width: 1024px) {
+        .main-content {
+            margin: 0;
+        }
+    }
+</style>
