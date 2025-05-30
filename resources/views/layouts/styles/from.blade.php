@@ -66,7 +66,7 @@
         box-shadow: none !important;
     }
 
-    .form-controll:disabled {
+    .form-control:disabled {
         background-color: #ddd !important;
         color: var(--text-color) !important;
     }
@@ -83,7 +83,7 @@
 
     .row-form {
         display: flex;
-        align-items: center;
+        align-items: start;
         justify-content: start;
         gap: 32px;
     }
@@ -91,7 +91,13 @@
     .row-form-container {
         display: flex;
         flex-direction: column;
-        gap: 8px;
+        gap: 16px;
+    }
+
+    .row-form-input {
+        display: flex;
+        flex-direction: row;
+        gap: 32px;
     }
 
     .form-button-container {
@@ -124,6 +130,11 @@
 
         .form-button-container {
             padding: 32px 16px;
+        }
+
+        .row-form-input {
+            flex-direction: column;
+            gap: 8px;
         }
     }
 

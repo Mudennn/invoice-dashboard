@@ -18,6 +18,12 @@ $menuItems = [
             ['text' => 'Debit Notes', 'route' => 'debit_notes.index']
         ]
     ],
+    [
+        'icon' => 'contacts',
+        'text' => 'Contacts',
+        'route' => 'contacts.index',
+        'active' => request()->routeIs('contacts.*')
+    ]
 ];
 @endphp
 
@@ -83,7 +89,7 @@ $menuItems = [
                 <a class="dropdown-item" style="--index: 1;">
                     <div class="d-flex align-items-center">
                         <span class="material-symbols-outlined me-2">settings</span>
-                        Settings
+                        Company Profile
                     </div>
                 </a>
                 <a class="dropdown-item text-danger" style="--index: 2;">

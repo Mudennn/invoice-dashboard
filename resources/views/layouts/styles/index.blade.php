@@ -158,10 +158,19 @@
         align-items: center !important;
         justify-content: center !important;
         gap: 8px !important;
+        width: fit-content !important;
 
         &:hover {
             color: white !important;
         }
+    }
+
+    .back-button {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        color: var(--primary) !important;
+        font-size: var(--fourteen) !important;
     }
 
     .outline-button {
@@ -176,7 +185,7 @@
         --bs-btn-border-color: var(--primary) !important;
     }
 
-    .btn-check:checked + .btn{
+    .btn-check:checked + .btn, :not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
         background-color: var(--primary) !important;
         border-color: var(--primary) !important;
         color: white !important;

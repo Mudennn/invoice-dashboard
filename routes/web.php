@@ -25,3 +25,11 @@ Route::get('/credit-notes', function () {
 Route::get('/debit-notes', function () {
     return view('debit_notes.index');
 })->name('debit_notes.index');
+
+Route::get('/contacts', function () {
+    return view('contacts.index');
+})->name('contacts.index');
+
+Route::get('/contacts/create', function () {
+    return view('contacts.create');
+})->name('contacts.create');
