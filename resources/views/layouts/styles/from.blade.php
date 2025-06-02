@@ -26,7 +26,7 @@
     .input-form {
         display: flex;
         flex-direction: column;
-        margin: 16px 0;
+        /* margin: 16px 0; */
         flex: 1;
     }
 
@@ -81,14 +81,14 @@
         font-size: 0.875rem !important;
     }
 
-    .row-form {
-        display: flex;
-        align-items: start;
-        justify-content: start;
+    .input-container {
+        display: grid;
+        grid-template-columns: 3fr 1fr;
+        /* grid-template-columns: minmax(400px, 2fr) minmax(200px, 1fr); */
         gap: 32px;
     }
 
-    .row-form-container {
+    .input-container .left-container {
         display: flex;
         flex-direction: column;
         gap: 16px;
@@ -96,8 +96,8 @@
 
     .row-form-input {
         display: flex;
-        flex-direction: row;
-        gap: 32px;
+        gap: 16px;
+        width: 100%;
     }
 
     .form-button-container {
@@ -109,7 +109,7 @@
         position: sticky;
         bottom: 0;
         background-color: white;
-        z-index: 100;
+        z-index: 2;
         margin-top: 0;
         border-top: 1px solid var(--border);
     }
@@ -123,18 +123,27 @@
         .form-header-container {
             padding: 40px 16px;
         }
-
+        
         .form-input-container {
             padding: 32px 16px;
+        }
+        
+        .input-container {
+            grid-template-columns: 1fr;
+        }
+
+        .input-container .left-container {
+            flex-direction: column;
+            gap: 16px;
+            margin-bottom: 0;
+        }
+
+        .input-container .right-container {
+            display: none;
         }
 
         .form-button-container {
             padding: 32px 16px;
-        }
-
-        .row-form-input {
-            flex-direction: column;
-            gap: 8px;
         }
     }
 
@@ -147,6 +156,14 @@
 
         .form-input-container {
             padding: 32px 16px;
+        }
+
+        .input-container {
+            grid-template-columns: 1fr;
+        }
+
+        .input-container .right-container {
+            display: none;
         }
 
         .form-button-container {

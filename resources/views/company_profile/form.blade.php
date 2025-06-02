@@ -7,32 +7,6 @@
 
     <div class="input-container">
         <div class="left-container">
-            <div class="row-form-input mb-2">
-                <div class="d-flex flex-column gap-1">
-                    <label for="entity_type" class="form-lable">Entity Type</label>
-                    <div class="btn-group col-12" role="group" aria-label="Basic radio toggle button group">
-                        <input type="radio" class="btn-check" name="entity_type" id="btnradio1" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio1">Company</label>
-
-                        <input type="radio" class="btn-check" name="entity_type" id="btnradio2" autocomplete="off"
-                            checked>
-                        <label class="btn btn-outline-primary" for="btnradio2">Individual</label>
-
-                        <input type="radio" class="btn-check" name="entity_type" id="btnradio3" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio3">General Public</label>
-
-                        <input type="radio" class="btn-check" name="entity_type" id="btnradio4" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio4">Foreign Company</label>
-
-                        <input type="radio" class="btn-check" name="entity_type" id="btnradio5" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio5">Foreign Individual</label>
-
-                        <input type="radio" class="btn-check" name="entity_type" id="btnradio6" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio6">Exempted Person</label>
-                    </div>
-                </div>
-            </div>
-
             <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
                     <label for="company_name" class="form-lable">Company Name</label>
@@ -56,20 +30,17 @@
                 <div class="d-flex flex-column gap-1">
                     <label for="registration_number_type" class="form-lable">Registration Number Type</label>
                     <div class="btn-group col-3" role="group" aria-label="Basic radio toggle button group">
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio1" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio1">None</label>
+                        <input type="radio" class="btn-check" name="registration_number_type" id="btnradio1" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary" for="btnradio1">BRN</label>
     
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio2" autocomplete="off" checked>
-                        <label class="btn btn-outline-primary" for="btnradio2">BRN</label>
+                        <input type="radio" class="btn-check" name="registration_number_type" id="btnradio2" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio2">NRIC</label>
     
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio3" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio3">NRIC</label>
+                        <input type="radio" class="btn-check" name="registration_number_type" id="btnradio3" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio3">Passport</label>
     
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio4" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio4">Passport</label>
-    
-                        <input type="radio" class="btn-check" name="btnradio" id="btnradio5" autocomplete="off">
-                        <label class="btn btn-outline-primary" for="btnradio5">Army</label>
+                        <input type="radio" class="btn-check" name="registration_number_type" id="btnradio4" autocomplete="off">
+                        <label class="btn btn-outline-primary" for="btnradio4">Army</label>
                     </div>
                 </div>
             </div>
@@ -123,7 +94,7 @@
 {{-- General Information --}}
 <div class="input-form form-input-container">
     <div class="d-flex flex-column gap-2 mb-4">
-        <h3>Contact Person</h3>
+        <h3>Comapany Contact</h3>
         <p class="sub-text">Contact person for the company</p>
     </div>
 
@@ -131,25 +102,12 @@
         <div class="left-container">
             <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
-                    <label for="name" class="form-lable">Name</label>
-                    <input type="text" name="name" class="form-control">
-
-                    @error('name')
-                        <span class="text-danger font-weight-bold small"># {{ $message }}</span>
-                    @enderror
-
-                </div>
-                <div class="w-100">
                     <label for="email" class="form-lable">Email</label>
                     <input type="email" name="email" class="form-control">
-
                     @error('email')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
                     @enderror
                 </div>
-            </div>
-
-            <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
                     <label for="phone" class="form-lable">Phone</label>
                     <input type="text" name="phone" class="form-control">
@@ -158,9 +116,7 @@
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
                     @enderror
                 </div>
-                <div class="w-100"></div>
             </div>
-            <button class="primary-button">Add Contact</button>
         </div>
         <div class="right-container"></div>
     </div>
@@ -235,6 +191,25 @@
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
                     @enderror
                 </div>
+            </div>
+        </div>
+        <div class="right-container"></div>
+    </div>
+</div>
+
+<hr>
+{{-- Address Information --}}
+<div class="input-form form-input-container">
+    <div class="d-flex flex-column gap-2 mb-4">
+        <h3>Company Logo</h3>
+        <p class="sub-text">Company logo for the company</p>
+    </div>
+
+    <div class="input-container">
+        <div class="left-container">
+            <div class="w-100">
+                <label for="logo" class="form-lable">Logo</label>
+                <input type="file" name="logo" class="form-control">
             </div>
         </div>
         <div class="right-container"></div>
