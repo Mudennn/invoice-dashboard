@@ -11,7 +11,7 @@
             <p>Create a new contact for your company</p>
         </div>
         <hr>
-        <form  method="POST" enctype="multipart/form-data">
+        <form action="{{ route('contacts.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @include('contacts.form')
 

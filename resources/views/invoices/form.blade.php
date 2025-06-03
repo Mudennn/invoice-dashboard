@@ -108,7 +108,7 @@
                 </div>
                 <div class="w-100">
                     <label for="currency" class="form-lable">Currency</label>
-                    <input type="text" name="currency" class="form-control">
+                    <input type="text" name="currency" class="form-control" value="MYR" readonly disabled>
     
                     @error('currency')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -169,13 +169,10 @@
             <thead class="thead-light">
                 <tr>
                     <th scope="col" class="text-center" style="width: 5%;">No</th>
-                    <th scope="col" style="width: 10%;">Item</th>
-                    <th scope="col" style="width: 10%;">Account</th>
-                    <th scope="col" style="width: 40%;">Quantity</th>
+                    <th scope="col" style="width: 10%;">Quantity</th>
+                    <th scope="col" style="width: 40%;">Description</th>
                     <th scope="col" style="width: 10%;">Unit Price</th>
                     <th scope="col" style="width: 10%;">Amount</th>
-                    <th scope="col" style="width: 5%;">Discount</th>
-                    <th scope="col" style="width: 5%;">Tax</th>
                     <th scope="col" style="width: 5%;">Actions</th>
                 </tr>
             </thead>

@@ -7,15 +7,14 @@
             <p>Create a new invoice for your customer</p>
         </div>
         <hr>
-        <form  method="POST" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('contacts.update', $customer_profile->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
 
-            @include('invoices.form')
+            @include('contacts.form')
             <hr>
             <div class="form-button-container">
-                <button type="submit" class="primary-button" id="btnSubmit">Create Invoice</button>
-                <a href="{{ route('invoices.index') }}" class="third-button">Cancel</a>
+                <button type="submit" class="primary-button" id="btnSubmit">Update Contact</button>
             </div>
         </form>
     </div>

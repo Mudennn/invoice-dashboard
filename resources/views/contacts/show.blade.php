@@ -6,21 +6,20 @@
             <h2>Delete Invoice</h2>
         </div>
         <hr>
-        <form method="POST" method="POST">
+        <form action="{{ route('contacts.destroy', $customer_profile->id) }}" method="POST">
             @csrf
             @method('DELETE')
 
-            @include('invoices.form')
+            @include('contacts.form')
             <hr>
-            <div class="pt-4">
+            <div style="padding: 32px 32px 16px 32px;">
                 <div class="alert alert-danger" role="alert">
                     Are you sure want to delete?
                 </div>
             </div>
 
             <div class="form-button-container">
-                <button type="submit" class="delete-button" id="btnSubmit">Delete User</button>
-                <a href="{{ route('admin.list_users.index') }}" class="third-button">Cancel</a>
+                <button type="submit" class="delete-button" id="btnSubmit">Delete Contact</button>
             </div>
         </form>
     </div>

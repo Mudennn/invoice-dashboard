@@ -36,7 +36,7 @@
 
         --muted: #acacac;
 
-        --destructive: #e7000b;
+        --destructive: #e7000c;
 
         --border: #E5E5E5;
         /*
@@ -173,6 +173,26 @@
         font-size: var(--fourteen) !important;
     }
 
+    .delete-button {
+        background-color: var(--destructive) !important;
+        padding: 2px 32px !important;
+        border-radius: 4px !important;
+        font-weight: 400 !important;
+        font-size: var(--sixteen) !important;
+        transition: all 0.3s !important;
+        color: white !important;
+        display: flex !important;
+        align-items: center !important;
+        justify-content: center !important;
+        gap: 8px !important;
+        width: fit-content !important;
+
+        &:hover {
+            color: white !important;
+            background: #e43942 !important;
+        }
+    }
+
     .outline-button {
         background-color: white !important;
         color: var(--primary) !important;
@@ -190,6 +210,67 @@
         border-color: var(--primary) !important;
         color: white !important;
     }
+
+     /* -------------------------------------------------------------- */
+    /* SWEETALERT */
+
+    .swal2-popup.swal2-toast.swal2-icon-success {
+        background-color: #a5dc86 !important;
+        border-radius: 8px !important;
+        border: 1px solid #c3e6cb !important;
+    }
+
+    .swal2-popup.swal2-toast.swal2-icon-error {
+        background-color: #f27474 !important;
+        border-radius: 8px !important;
+        border: 1px solid #f5c6cb !important;
+    }
+
+    .swal2-popup.swal2-toast.swal2-icon-info {
+        background-color: #f8bb86 !important;
+        border-radius: 8px !important;
+        border: 1px solid #ffeeba !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-title {
+        color: white !important;
+        font-size: 16px !important;
+        font-weight: 500 !important;
+        margin: 11px 8px 0 8px !important;
+        padding: 0 !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-close {
+        color: white !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-html-container {
+        color: white !important;
+    }
+
+    /* Add these styles for white icons */
+    .swal2-popup.swal2-toast .swal2-icon.swal2-success .swal2-success-ring {
+        border-color: white !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-icon.swal2-success [class^='swal2-success-line'] {
+        background-color: white !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-icon.swal2-error [class^='swal2-x-mark-line'] {
+        background-color: white !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-icon.swal2-error {
+        border-color: white !important;
+    }
+
+    .swal2-popup.swal2-toast .swal2-icon.swal2-info {
+        border-color: white !important;
+        color: white !important;
+    }
+
+    /* -------------------------------------------------------------- */
 
     /* Mobile styles */
     @media only screen and (max-width: 767px) {

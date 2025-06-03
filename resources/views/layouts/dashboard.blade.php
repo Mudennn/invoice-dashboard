@@ -44,6 +44,8 @@
             });
         });
     </script>
+    @include('sweetalert::alert')
+    @stack('scripts')
 </body>
 
 </html>

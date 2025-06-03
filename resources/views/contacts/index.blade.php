@@ -18,6 +18,18 @@
                     </tr>
                 </thead>
                 <tbody>
+                    @foreach ($customers as $index => $customer)
+                        <tr>
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td>{{ $customer->customer_name }}</td>
+                            <td>{{ $customer->registration_number }}</td>
+                            <td>{{ $customer->entity_type_text }}</td>
+                            <td>
+                                <a href="{{ route('contacts.edit', $customer->id) }}" class="btn btn-warning">Edit</a>
+                                <a href="{{ route('contacts.show', $customer->id) }}" class="btn btn-danger">Delete</a>
+                            </td>
+                        </tr>
+                    @endforeach
 
                 </tbody>
             </table>
