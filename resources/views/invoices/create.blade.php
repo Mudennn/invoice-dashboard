@@ -11,7 +11,7 @@
             <p>Create a new invoice for your customer</p>
         </div>
         <hr>
-        <form  method="POST" enctype="multipart/form-data">
+        <form action="{{ route('invoices.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
             @include('invoices.form')
 

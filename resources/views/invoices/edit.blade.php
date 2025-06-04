@@ -2,20 +2,23 @@
 
 @section('content')
     <div>
-        <div class="d-flex flex-column gap-2" style="padding: 40px;">
-            <h2>New Invoice</h2>
-            <p>Create a new invoice for your customer</p>
+        <div class="d-flex flex-column gap-2 form-header-container">
+            <a href="{{ url()->previous() }}" class="back-button mb-4">
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
+                Back
+            </a>
+            <h2>Edit Invoice</h2>
+            <p>Edit the invoice for your customer</p>
         </div>
         <hr>
-        <form  method="POST" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('invoices.update', $invoice->id) }}" method="POST" enctype="multipart/form-data">
             @csrf
             @method('PATCH')
 
             @include('invoices.form')
             <hr>
             <div class="form-button-container">
-                <button type="submit" class="primary-button" id="btnSubmit">Create Invoice</button>
-                <a href="{{ route('invoices.index') }}" class="third-button">Cancel</a>
+                <button type="submit" class="primary-button" id="btnSubmit">Update Invoice</button>
             </div>
         </form>
     </div>

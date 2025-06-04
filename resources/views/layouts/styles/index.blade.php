@@ -193,6 +193,15 @@
         }
     }
 
+    .delete-icon-button {
+        background-color: var(--destructive) !important;
+        padding: 4px!important;
+        border-radius: 50px !important;
+        font-weight: 400 !important;
+        color: white !important;
+        font-size: var(--sixteen) !important;
+    }
+
     .outline-button {
         background-color: white !important;
         color: var(--primary) !important;

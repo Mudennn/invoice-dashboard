@@ -69,11 +69,17 @@ class InvoicesController extends Controller
                 'invoice_no' => $request->invoice_no,
                 'invoice_date' => $request->invoice_date ? \Carbon\Carbon::parse($request->invoice_date)->format('Y/m/d') : null,
                 'customer' => $request->customer,
+                'billing_attention' => $request->billing_attention,
+                'billing_address' => $request->billing_address,
+                'shipping_info' => $request->shipping_info,
+                'shipping_attention' => $request->shipping_attention,
+                'shipping_address' => $request->shipping_address,
+                'reference_number' => $request->reference_number,
                 'title' => $request->title,
                 'internal_note' => $request->internal_note,
                 'description' => $request->description,
                 'tags' => $request->tags,
-                'currency' => $request->currency,
+                'currency' => 'MYR',
                 'control' => $request->control,
                 'status' => '0',
                 // 'created_by' => $user->id,
@@ -104,7 +110,7 @@ class InvoicesController extends Controller
                 ]);
             }
 
-            Alert::toast('Success', 'Invoice created successfully', 'success');
+            Alert::toast('Invoice created successfully', 'success');
             return redirect()->route('invoices.index');
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
@@ -113,7 +119,7 @@ class InvoicesController extends Controller
                     'message' => ['error' => [$e->getMessage()]]
                 ], 422);
             }
-            Alert::toast('Error', $e->getMessage(), 'error');
+            Alert::toast($e->getMessage(), 'error');
             return back()->withErrors(['error' => $e->getMessage()])
                 ->withInput();
         }
@@ -156,6 +162,12 @@ class InvoicesController extends Controller
                 'invoice_no' => $request->invoice_no,
                 'invoice_date' => $request->invoice_date ? \Carbon\Carbon::parse($request->invoice_date)->format('Y/m/d') : null,
                 'customer' => $request->customer,
+                'billing_attention' => $request->billing_attention,
+                'billing_address' => $request->billing_address,
+                'shipping_info' => $request->shipping_info,
+                'shipping_attention' => $request->shipping_attention,
+                'shipping_address' => $request->shipping_address,
+                'reference_number' => $request->reference_number,
                 'title' => $request->title,
                 'internal_note' => $request->internal_note,
                 'description' => $request->description,
@@ -190,6 +202,7 @@ class InvoicesController extends Controller
                     } else {
                         // Only create if it's truly a new item
                         $invoice->invoiceItems()->create([
+                            'quantity' => $item['quantity'],
                             'description' => $item['description'],
                             'unit_price' => $item['unit_price'],
                             'amount' => $item['amount'],
@@ -215,7 +228,7 @@ class InvoicesController extends Controller
                 ]);
             }
 
-            Alert::toast('Success', 'Invoice created successfully', 'success');
+            Alert::toast('Invoice created successfully', 'success');
             return redirect()->route('invoices.index');
         } catch (\Exception $e) {
             if ($request->wantsJson()) {
@@ -224,7 +237,7 @@ class InvoicesController extends Controller
                     'message' => ['error' => [$e->getMessage()]]
                 ], 422);
             }
-            Alert::toast('Error', $e->getMessage(), 'error');
+            Alert::toast($e->getMessage(), 'error');
             return back()->withErrors(['error' => $e->getMessage()])
                 ->withInput();
         }
@@ -247,6 +260,15 @@ class InvoicesController extends Controller
         return view('invoices.show', compact('invoice', 'customers', 'states', 'ro'));
     }
 
+    public function view($id)
+    {
+        $invoice = Invoices::with(['invoiceItems' => function ($query) {
+            $query->where('status', '0');
+        }])->findOrFail($id);
+
+        return view('invoices.view', compact('invoice'));
+    }
+
     public function destroy($id)
     {
         // $user = Auth::user();
@@ -256,7 +278,7 @@ class InvoicesController extends Controller
             // 'updated_by' => $user->id,
         ]);
 
-        Alert::toast('Success', 'Invoice deleted successfully', 'success');
+        Alert::toast('Invoice deleted successfully', 'success');
         return redirect()->route('invoices.index');
     }
 }
