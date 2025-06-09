@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use App\Models\Customer;
 use App\Models\Selections;
 use RealRashid\SweetAlert\Facades\Alert;
+use Illuminate\Support\Facades\DB;
 
 class InvoicesController extends Controller
 {
@@ -21,6 +22,13 @@ class InvoicesController extends Controller
     public function index()
     {
         $invoices = Invoices::select('invoices.*')->where('invoices.status', '0')->orderBy('invoices.created_at', 'desc')->get();
+        
+        // FOR API CREDIT NOTE
+        // Return JSON response if requested
+        if (request()->wantsJson() || request()->has('format') && request()->format === 'json') {
+            return response()->json($invoices);
+        }
+        
         return view('invoices.index', compact('invoices'));
     }
 
@@ -55,6 +63,8 @@ class InvoicesController extends Controller
     public function store(InvoiceFormRequest $request)
     {
         try {
+
+            DB::beginTransaction();
             // $user = Auth::user();
 
             // Generate Invoice UUID
@@ -102,6 +112,8 @@ class InvoicesController extends Controller
                 }
             }
 
+            DB::commit();
+
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
@@ -113,6 +125,7 @@ class InvoicesController extends Controller
             Alert::toast('Invoice created successfully', 'success');
             return redirect()->route('invoices.index');
         } catch (\Exception $e) {
+            DB::rollBack();
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -145,6 +158,7 @@ class InvoicesController extends Controller
     public function update(InvoiceFormRequest $request, $id)
     {
         try {
+            DB::beginTransaction();
             // $user = Auth::user();
 
             $invoice = Invoices::findOrFail($id);
@@ -161,7 +175,6 @@ class InvoicesController extends Controller
                 'customer' => $request->customer,
                 'invoice_no' => $request->invoice_no,
                 'invoice_date' => $request->invoice_date ? \Carbon\Carbon::parse($request->invoice_date)->format('Y/m/d') : null,
-                'customer' => $request->customer,
                 'billing_attention' => $request->billing_attention,
                 'billing_address' => $request->billing_address,
                 'shipping_info' => $request->shipping_info,
@@ -220,17 +233,20 @@ class InvoicesController extends Controller
                 $invoice->invoiceItems()->whereIn('id', $removeIds)->delete();
             }
 
+            DB::commit();
+
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => true,
-                    'message' => 'Invoice created successfully',
+                    'message' => 'Invoice updated successfully',
                     'redirect' => route('invoices.index'),
                 ]);
             }
 
-            Alert::toast('Invoice created successfully', 'success');
+            Alert::toast('Invoice updated successfully', 'success');
             return redirect()->route('invoices.index');
         } catch (\Exception $e) {
+            DB::rollBack();
             if ($request->wantsJson()) {
                 return response()->json([
                     'success' => false,
@@ -280,5 +296,62 @@ class InvoicesController extends Controller
 
         Alert::toast('Invoice deleted successfully', 'success');
         return redirect()->route('invoices.index');
+    }
+
+    /**
+     * Get invoice details by invoice number.
+     * This method can be used by credit notes, debit notes, etc.
+     *
+     * @param string $invoice_no
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getInvoiceDetails($invoice_no)
+    {
+        try {
+            $invoice = Invoices::with(['invoiceItems' => function ($query) {
+                $query->where('status', '0');
+            }])->where('invoice_no', $invoice_no)->where('status', '0')->first();
+            
+            if (!$invoice) {
+                return response()->json([
+                    'success' => false,
+                    'message' => 'Invoice not found'
+                ], 404);
+            }
+            
+            // Format the response with items
+            $response = [
+                'invoice_no' => $invoice->invoice_no,
+                'invoice_uuid' => $invoice->invoice_uuid,
+                'invoice_date' => $invoice->invoice_date,
+                'customer' => $invoice->customer,
+                'billing_attention' => $invoice->billing_attention,
+                'billing_address' => $invoice->billing_address,
+                'shipping_attention' => $invoice->shipping_attention,
+                'shipping_address' => $invoice->shipping_address,
+                'shipping_info' => $invoice->shipping_info,
+                'reference_number' => $invoice->reference_number,
+                'items' => []
+            ];
+            
+            // Add items to the response
+            foreach ($invoice->invoiceItems as $item) {
+                $response['items'][] = [
+                    'quantity' => $item->quantity,
+                    'description' => $item->description,
+                    'unit_price' => $item->unit_price,
+                    'amount' => $item->amount,
+                    'total' => $item->total
+                ];
+            }
+            
+            return response()->json($response);
+            
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 }

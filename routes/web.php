@@ -3,6 +3,7 @@
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\CustomerController;
+use App\Http\Controllers\CreditNoteController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -19,6 +20,10 @@ Route::delete('invoices/{id}', [InvoicesController::class, 'destroy'])->name('in
 Route::get('invoices/{id}/view', [InvoicesController::class, 'view'])->name('invoices.view');
 Route::post('search', [InvoicesController::class, 'search'])->name('invoices.search');
 
+// Add generic invoice details endpoint
+Route::get('invoices/get-details/{invoice_no}', [InvoicesController::class, 'getInvoiceDetails'])
+    ->name('invoices.get-details');
+
 // Contacts Routes
 Route::get('contacts', [CustomerController::class, 'index'])->name('contacts.index');
 Route::get('contacts/create', [CustomerController::class, 'create'])->name('contacts.create');
@@ -30,9 +35,17 @@ Route::delete('contacts/{id}', [CustomerController::class, 'destroy'])->name('co
 Route::get('contacts/{id}/view', [CustomerController::class, 'view'])->name('contacts.view');
 Route::post('search', [InvoicesController::class, 'search'])->name('invoices.search');
 
-Route::get('/credit-notes', function () {
-    return view('credit_notes.index');
-})->name('credit_notes.index');
+// Credit Note Routes
+Route::get('credit_notes', [CreditNoteController::class, 'index'])->name('credit_notes.index');
+Route::get('credit_notes/create', [CreditNoteController::class, 'create'])->name('credit_notes.create');
+Route::post('credit_notes', [CreditNoteController::class, 'store'])->name('credit_notes.store');
+Route::get('credit_notes/{id}/edit', [CreditNoteController::class, 'edit'])->name('credit_notes.edit');
+Route::patch('credit_notes/{id}', [CreditNoteController::class, 'update'])->name('credit_notes.update');
+Route::get('credit_notes/{id}', [CreditNoteController::class, 'show'])->name('credit_notes.show');
+Route::delete('credit_notes/{id}', [CreditNoteController::class, 'destroy'])->name('credit_notes.destroy');
+Route::get('credit_notes/{id}/view', [CreditNoteController::class, 'view'])->name('credit_notes.view');
+
+
 
 Route::get('/debit-notes', function () {
     return view('debit_notes.index');

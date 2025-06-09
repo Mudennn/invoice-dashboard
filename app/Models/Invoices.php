@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use App\Models\InvoiceItems;
+use App\Models\CreditNote;
 
 class Invoices extends Model
 {
@@ -34,10 +35,10 @@ class Invoices extends Model
     }
 
     // Relationship with CreditNotes
-    // public function creditNotes(): HasMany
-    // {
-    //     return $this->hasMany(CreditNote::class, 'invoice_no', 'invoice_no');
-    // }
+    public function creditNotes(): HasMany
+    {
+        return $this->hasMany(CreditNote::class, 'invoice_no', 'invoice_no');
+    }
 
     // // Relationship with DebitNotes
     // public function debitNotes(): HasMany

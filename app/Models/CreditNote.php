@@ -1,0 +1,25 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use App\Models\Invoices;
+use App\Models\CreditNoteItems;
+
+class CreditNote extends Model
+{
+    protected $table = 'credit_notes';
+    protected $primaryKey = 'id';
+    protected $fillable = ['customer', 'billing_attention', 'billing_address', 'shipping_info', 'shipping_attention', 'shipping_address', 'invoice_no', 'invoice_uuid', 'credit_note_no', 'credit_note_date', 'reference_number', 'title', 'internal_note', 'description', 'tags', 'currency', 'control', 'status', 'created_by', 'updated_by'];
+
+    public function invoice(): BelongsTo
+    {
+        return $this->belongsTo(Invoices::class, 'invoice_no', 'invoice_no');
+    }
+
+    public function creditItems()
+    {
+        return $this->hasMany(CreditNoteItems::class);
+    }
+}

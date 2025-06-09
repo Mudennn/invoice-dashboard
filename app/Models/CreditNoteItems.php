@@ -1,0 +1,18 @@
+<?php
+
+namespace App\Models;
+
+use Illuminate\Database\Eloquent\Model;
+use App\Models\CreditNote;
+
+class CreditNoteItems extends Model
+{
+    protected $table = 'credit_note_items';
+    protected $primaryKey = 'id';
+    protected $fillable = ['credit_note_id', 'quantity', 'description', 'unit_price', 'amount', 'total', 'subtotal', 'status', 'currency_code', 'created_by', 'updated_by'];
+
+    public function creditNote()
+    {
+        return $this->belongsTo(CreditNote::class, 'credit_note_id', 'id');
+    }
+}

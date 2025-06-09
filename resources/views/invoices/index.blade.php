@@ -15,8 +15,8 @@
                         <th scope="col" style="width: 10%;">Invoice Date</th>
                         <th scope="col" style="width: 40%;">Customer</th>
                         <th scope="col" style="width: 10%;">Amount</th>
-                        <th scope="col" style="width: 10%;">Control</th>
-                        <th scope="col" style="width: 5%;">Actions</th>
+                        <th scope="col" style="width: 10%;">Status</th>
+                        <th scope="col" style="width: 5%;"></th>
                     </tr>
                 </thead>
                 <tbody>
@@ -24,7 +24,7 @@
                         <tr>
                             <td>{{ $invoice->id }}</td>
                             <td>{{ $invoice->invoice_no }}</td>
-                            <td>{{ $invoice->invoice_date }} {{ $invoice->control_text }}</td>
+                            <td>{{ $invoice->invoice_date }}</td>
                             <td>{{ $invoice->customer }}</td>
                             <td>{{ $invoice->amount }}</td>
                             @php
@@ -38,10 +38,46 @@
                                 }
                             @endphp
                             <td><span class="badge {{ $badge_color }}">{{ $control_text }}</span></td>
-                            <td>
-                                <a href="{{ route('invoices.edit', $invoice->id) }}" class="btn btn-primary">Edit</a>
-                                <a href="{{ route('invoices.view', $invoice->id) }}" class="btn btn-info">View</a>
-                                <a href="{{ route('invoices.show', $invoice->id) }}" class="btn btn-danger">Delete</a>
+                            <td class="text-center">
+                                <div class="dropdown">
+                                    <button class="hide-arrow p-0 border-0" type="button" id="dropdownMenuButton1"
+                                        data-bs-toggle="dropdown" aria-expanded="false">
+                                        <span class="material-symbols-outlined"style="font-size: 18px; color: #646e78;">
+                                            more_vert
+                                        </span>
+                                    </button>
+                                    <ul class="dropdown-menu" aria-labelledby="dropdownMenuButton1">
+                                        <li><a href="{{ route('invoices.edit', $invoice->id) }}" class="dropdown-item"
+                                                href="#"
+                                                style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span
+                                                    class="material-symbols-outlined" style="font-size: 14px">
+                                                    edit
+                                                </span> Edit</a></li>
+                                        {{-- <li><a href="{{ route('invoices.payments', $invoice->id) }}"
+                                                    class="dropdown-item"
+                                                    style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span
+                                                        class="material-symbols-outlined" style="font-size: 14px">
+                                                        payments
+                                                    </span> View Payments</a></li> --}}
+                                        <li><a href="{{ route('invoices.view', $invoice->id) }}" class="dropdown-item"
+                                                style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span
+                                                    class="material-symbols-outlined" style="font-size: 14px">
+                                                    list_alt
+                                                </span> View Items</a></li>
+                                        {{-- <li><a href="{{ route('invoices.print', $invoice->id) }}" class="dropdown-item"
+                                                    target="_blank"
+                                                    style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span
+                                                        class="material-symbols-outlined" style="font-size: 14px">
+                                                        print
+                                                    </span> Print Invoice</a></li> --}}
+                                        <li><a href="{{ route('invoices.destroy', $invoice->id) }}"
+                                                class="dropdown-item text-danger" href="#"
+                                                style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span
+                                                    class="material-symbols-outlined" style="font-size: 14px">
+                                                    delete
+                                                </span>Delete</a></li>
+                                    </ul>
+                                </div>
                             </td>
                         </tr>
                     @endforeach

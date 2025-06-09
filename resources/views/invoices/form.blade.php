@@ -301,95 +301,31 @@
         const form = document.querySelector('form');
         if (form) {
             form.addEventListener('submit', function(e) {
-                e.preventDefault();
-                
-                // Clear previous errors
+                // Validate form before submission
                 const errorContainer = document.getElementById('validation-errors');
                 if (errorContainer) {
                     errorContainer.innerHTML = '';
                     errorContainer.style.display = 'none';
                 }
-                
-                // Submit form via AJAX
-                const formData = new FormData(form);
-                
-                fetch(form.action, {
-                    method: form.method,
-                    body: formData,
-                    headers: {
-                        'X-Requested-With': 'XMLHttpRequest',
-                        'Accept': 'application/json'
-                    }
-                })
-                .then(response => {
-                    // Check if the response is ok (status in the range 200-299)
-                    if (!response.ok) {
-                        if (response.status === 422) {
-                            // Validation error
-                            return response.json().then(data => {
-                                throw { validationErrors: data };
-                            });
-                        }
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    if (data.success) {
-                        // Redirect on success
-                        window.location.href = data.redirect;
-                    } else if (data.message || data.errors) {
-                        // Display validation errors
-                        displayErrors(data.message || data.errors);
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    if (error.validationErrors) {
-                        // Handle validation errors returned by the server
-                        displayErrors(error.validationErrors.errors || error.validationErrors.message || error.validationErrors);
-                    } else if (errorContainer) {
-                        errorContainer.innerHTML = '<ul class="list-unstyled mb-0"><li>An unexpected error occurred. Please try again.</li></ul>';
-                        errorContainer.style.display = 'block';
-                    }
-                });
+
+                // Show loading state
+                const submitButton = document.getElementById('btnSubmit');
+                if (submitButton) {
+                    submitButton.disabled = true;
+                    const originalText = submitButton.innerHTML;
+                    submitButton.innerHTML = 'Processing...';
+                    
+                    // Re-enable the button after form submission
+                    setTimeout(() => {
+                        submitButton.disabled = false;
+                        submitButton.innerHTML = originalText;
+                    }, 3000);
+                }
+
+                // Let the form submit normally to the server
+                // This will ensure Laravel's Alert toast is displayed correctly
+                return true;
             });
-        }
-        
-        // Display validation errors
-        function displayErrors(errors) {
-            const errorContainer = document.getElementById('validation-errors');
-            if (!errorContainer) return;
-            
-            console.log('Errors received:', errors); // Debug log
-            
-            let errorList = '<ul class="list-unstyled mb-0">';
-            
-            if (typeof errors === 'object' && errors !== null) {
-                // Handle Laravel's validation error format
-                Object.keys(errors).forEach(field => {
-                    if (Array.isArray(errors[field])) {
-                        errors[field].forEach(message => {
-                            errorList += `<li>${message}</li>`;
-                        });
-                    } else if (typeof errors[field] === 'string') {
-                        errorList += `<li>${errors[field]}</li>`;
-                    }
-                });
-            } else if (typeof errors === 'string') {
-                errorList += `<li>${errors}</li>`;
-            } else if (Array.isArray(errors)) {
-                errors.forEach(message => {
-                    errorList += `<li>${message}</li>`;
-                });
-            }
-            
-            errorList += '</ul>';
-            errorContainer.innerHTML = errorList;
-            errorContainer.style.display = 'block';
-            
-            // Scroll to error messages
-            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
         }
         
         // --------------------------------------------------------------
