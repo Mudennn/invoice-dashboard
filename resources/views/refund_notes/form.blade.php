@@ -1,7 +1,7 @@
-<input type="hidden" name="id" value="{{ $credit_note->id }}">
-<input type="hidden" name="invoice_no" value="{{ $credit_note->invoice_no }}">
-<input type="hidden" name="invoice_uuid" value="{{ $credit_note->invoice_uuid }}">
-{{-- <input type="hidden" name="credit_note_uuid" value="{{ $credit_note->credit_note_uuid ?? Str::uuid()->toString() }}"> --}}
+<input type="hidden" name="id" value="{{ $refund_note->id }}">
+<input type="hidden" name="invoice_no" value="{{ $refund_note->invoice_no }}">
+<input type="hidden" name="invoice_uuid" value="{{ $refund_note->invoice_uuid }}">
+{{-- <input type="hidden" name="refund_note_uuid" value="{{ $refund_note->refund_note_uuid ?? Str::uuid()->toString() }}"> --}}
 
 @if ($errors->any())
     <div class="alert alert-danger" id="validation-errors" style="display: block;">
@@ -32,9 +32,9 @@
                     <select name="customer" id="customer" class="form-control form-select" {{ $ro }}>
                         <option value=""> {{ 'Choose :' }}</option>
                         @foreach ($customers as $customer)
-                            @if ($credit_note->customer)
+                            @if ($refund_note->customer)
                                 <option value="{{ $customer }}"
-                                    {{ $customer == $credit_note->customer ? 'selected' : '' }}>{{ $customer }}</option>
+                                    {{ $customer == $refund_note->customer ? 'selected' : '' }}>{{ $customer }}</option>
                             @else
                                 <option value="{{ $customer }}"
                                     {{ $customer == old('customer') ? 'selected' : '' }}>{{ $customer }}</option>
@@ -50,7 +50,7 @@
                 <div class="w-100">
                     <label for="shipping_info" class="form-lable">Shipping Info</label>
                     <input type="text" name="shipping_info" class="form-control"
-                        value="{{ $credit_note->shipping_info }}" {{ $ro }}>
+                        value="{{ $refund_note->shipping_info }}" {{ $ro }}>
 
                     @error('shipping_info')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -61,7 +61,7 @@
                 <div class="w-100">
                     <label for="billing_attention" class="form-lable">Billing Attention</label>
                     <input type="text" name="billing_attention" class="form-control"
-                        value="{{ $credit_note->billing_attention }}" {{ $ro }}>
+                        value="{{ $refund_note->billing_attention }}" {{ $ro }}>
 
                     @error('billing_attention')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -70,7 +70,7 @@
                 <div class="w-100">
                     <label for="shipping_attention" class="form-lable">Shipping Attention</label>
                     <input type="text" name="shipping_attention" class="form-control"
-                        value="{{ $credit_note->shipping_attention }}" {{ $ro }}>
+                        value="{{ $refund_note->shipping_attention }}" {{ $ro }}>
 
                     @error('shipping_attention')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -80,7 +80,7 @@
             <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
                     <label for="billing_address" class="form-lable">Billing Address</label>
-                    <textarea name="billing_address" class="form-control" {{ $ro }}>{{ $credit_note->billing_address }}</textarea>
+                    <textarea name="billing_address" class="form-control" {{ $ro }}>{{ $refund_note->billing_address }}</textarea>
 
                     @error('billing_address')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -88,7 +88,7 @@
                 </div>
                 <div class="w-100">
                     <label for="shipping_address" class="form-lable">Shipping Address</label>
-                    <textarea name="shipping_address" class="form-control" {{ $ro }}>{{ $credit_note->shipping_address }}</textarea>
+                    <textarea name="shipping_address" class="form-control" {{ $ro }}>{{ $refund_note->shipping_address }}</textarea>
 
                     @error('shipping_address')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -112,11 +112,11 @@
         <div class="left-container">
             <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
-                    <label for="credit_note_no" class="form-lable">Credit Note Number</label>
-                    <input type="text" name="credit_note_no" class="form-control"
-                        value="{{$credit_note->credit_note_no }}" {{ $ro }}>
+                    <label for="refund_note_no" class="form-lable">Refund Note Number</label>
+                    <input type="text" name="refund_note_no" class="form-control"
+                        value="{{$refund_note->refund_note_no }}" {{ $ro }}>
 
-                    @error('credit_note_no')
+                    @error('refund_note_no')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
                     @enderror
 
@@ -124,7 +124,7 @@
                 <div class="w-100">
                     <label for="reference_number" class="form-lable">Reference Number</label>
                     <input type="text" name="reference_number" class="form-control"
-                        value="{{ $credit_note->reference_number }}" {{ $ro }}>
+                        value="{{ $refund_note->reference_number }}" {{ $ro }}>
 
                     @error('reference_number')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -136,7 +136,7 @@
                 <div class="w-100">
                     <label for="invoice_date" class="form-lable">Date</label>
                     <input type="date" name="invoice_date" class="form-control"
-                        value="{{ old('invoice_date', isset($credit_note->invoice_date) ? \Carbon\Carbon::parse($credit_note->invoice_date)->format('Y-m-d') : now()->timezone('Asia/Kuala_Lumpur')->format('Y-m-d')) }}">
+                        value="{{ old('invoice_date', isset($refund_note->invoice_date) ? \Carbon\Carbon::parse($refund_note->invoice_date)->format('Y-m-d') : now()->timezone('Asia/Kuala_Lumpur')->format('Y-m-d')) }}">
 
                     @error('invoice_date')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -155,7 +155,7 @@
                 <div class="w-100">
                     <label for="description" class="form-lable">Description</label>
                     <input type="text" name="description" class="form-control"
-                        value="{{ $credit_note->description }}" {{ $ro }}>
+                        value="{{ $refund_note->description }}" {{ $ro }}>
 
                     @error('description')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -164,7 +164,7 @@
                 <div class="w-100">
                     <label for="internal_note" class="form-lable">Internal Note</label>
                     <input type="text" name="internal_note" class="form-control"
-                        value="{{ $credit_note->internal_note }}" {{ $ro }}>
+                        value="{{ $refund_note->internal_note }}" {{ $ro }}>
 
                     @error('internal_note')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -175,7 +175,7 @@
             <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
                     <label for="tags" class="form-lable">Tags</label>
-                    <input type="text" name="tags" class="form-control" value="{{ $credit_note->tags }}"
+                    <input type="text" name="tags" class="form-control" value="{{ $refund_note->tags }}"
                         {{ $ro }}>
 
                     @error('tags')
@@ -184,7 +184,7 @@
                 </div>
                 <div class="w-100">
                     <label for="title" class="form-lable">Title</label>
-                    <input type="text" name="title" class="form-control" value="{{ $credit_note->title }}"
+                    <input type="text" name="title" class="form-control" value="{{ $refund_note->title }}"
                         {{ $ro }}>
 
                     @error('title')
@@ -218,8 +218,8 @@
                 </tr>
             </thead>
             <tbody id="invoice-items-body">
-                @if(isset($credit_note->creditItems) && count($credit_note->creditItems) > 0)
-                    @foreach($credit_note->creditItems as $index => $item)
+                @if(isset($refund_note->refundItems) && count($refund_note->refundItems) > 0)
+                    @foreach($refund_note->refundItems as $index => $item)
                     <tr class="invoice-item-row">
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td>
@@ -277,15 +277,15 @@
 
     <div class="btn-group col-12 col-md-5 col-lg-3" role="group" aria-label="Basic radio toggle button group">
         <input type="radio" class="btn-check" name="control" id="btnradio1" value="1" autocomplete="off"
-            {{ $credit_note->control == 'draft' ? 'checked' : '' }} checked>
+            {{ $refund_note->control == 'draft' ? 'checked' : '' }} checked>
         <label class="btn btn-outline-primary" for="btnradio1">Draft</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio2" value="2" autocomplete="off"
-            {{ $credit_note->control == 'pending' ? 'checked' : '' }}>
+            {{ $refund_note->control == 'pending' ? 'checked' : '' }}>
         <label class="btn btn-outline-primary" for="btnradio2">Pending</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio3" value="3" autocomplete="off"
-            {{ $credit_note->control == 'ready' ? 'checked' : '' }}>
+            {{ $refund_note->control == 'ready' ? 'checked' : '' }}>
         <label class="btn btn-outline-primary" for="btnradio3">Ready</label>
     </div>
 </div>
@@ -294,7 +294,7 @@
 <script>
     document.addEventListener('DOMContentLoaded', function() {
         // Initialize row counter
-        let rowCount = {{ isset($credit_note->creditItems) ? count($credit_note->creditItems) : 0 }};
+        let rowCount = {{ isset($refund_note->refundItems) ? count($refund_note->refundItems) : 0 }};
         
         // Calculate totals on page load
         calculateTotals();
@@ -398,7 +398,7 @@
                     itemsTableBody.innerHTML = '';
                     rowCount = 0;
 
-                    // Add invoice items to the credit note
+                    // Add invoice items to the refund note
                     if (data.items && data.items.length > 0) {
                         data.items.forEach((item, index) => {
                             const newRow = document.createElement('tr');

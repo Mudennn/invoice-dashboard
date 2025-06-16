@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard', ['title' => 'View Items Refund Note #' . $refund_note->refund_note_no])
 
 @section('content')
 <div>
@@ -8,11 +8,11 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
                 Back
             </a>
-            <a href="{{ route('invoices.edit', $invoice->id) }}" class="primary-button">Edit</a>
+            <a href="{{ route('refund_notes.edit', $refund_note->id) }}" class="primary-button">Edit</a>
         </div>
        
-        <h2>Credit Note Details</h2>
-        <p>View the credit note details</p>
+        <h2>Refund Note Details</h2>
+        <p>View the refund note details</p>
     </div>
     <hr>
 <div class="form-input-container">
@@ -28,8 +28,8 @@
                 </tr>
             </thead>
             <tbody>
-                @if(isset($invoice->invoiceItems) && count($invoice->invoiceItems) > 0)
-                    @foreach($invoice->invoiceItems as $index => $item)
+                @if(isset($refund_note->refundItems) && count($refund_note->refundItems) > 0)
+                    @foreach($refund_note->refundItems as $index => $item)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
                             <td class="text-center">{{ $item->quantity }}</td>
@@ -47,11 +47,11 @@
             <tfoot>
                 <tr>
                     <td colspan="4" class="text-end"><strong>Subtotal</strong></td>
-                    <td>RM {{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td>RM {{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
                 </tr>
                 <tr>
                     <td colspan="4" class="text-end"><strong>TOTAL</strong></td>
-                    <td>RM {{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td>RM {{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
                 </tr>
             </tfoot>
         </table>

@@ -5,6 +5,7 @@ use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\DebitNoteController;
+use App\Http\Controllers\RefundNoteController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -55,6 +56,16 @@ Route::patch('debit_notes/{id}', [DebitNoteController::class, 'update'])->name('
 Route::get('debit_notes/{id}', [DebitNoteController::class, 'show'])->name('debit_notes.show');
 Route::delete('debit_notes/{id}', [DebitNoteController::class, 'destroy'])->name('debit_notes.destroy');
 Route::get('debit_notes/{id}/view', [DebitNoteController::class, 'view'])->name('debit_notes.view');
+
+// Refund Note Routes
+Route::get('refund_notes', [RefundNoteController::class, 'index'])->name('refund_notes.index');
+Route::get('refund_notes/create', [RefundNoteController::class, 'create'])->name('refund_notes.create');
+Route::post('refund_notes', [RefundNoteController::class, 'store'])->name('refund_notes.store');
+Route::get('refund_notes/{id}/edit', [RefundNoteController::class, 'edit'])->name('refund_notes.edit');
+Route::patch('refund_notes/{id}', [RefundNoteController::class, 'update'])->name('refund_notes.update');
+Route::get('refund_notes/{id}', [RefundNoteController::class, 'show'])->name('refund_notes.show');
+Route::delete('refund_notes/{id}', [RefundNoteController::class, 'destroy'])->name('refund_notes.destroy');
+Route::get('refund_notes/{id}/view', [RefundNoteController::class, 'view'])->name('refund_notes.view');
 
 
 

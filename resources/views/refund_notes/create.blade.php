@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard', ['title' => 'New Refund Note'])
 
 @section('content')
     <div class="relative">
@@ -7,16 +7,16 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
                 Back
             </a>
-            <h2>New Credit Note</h2>
-            <p>Create a new credit note for your customer</p>
+            <h2>New Refund Note</h2>
+            <p>Create a new refund note for your customer</p>
         </div>
         <hr>
-        <form action="{{ route('credit_notes.store') }}" method="POST" enctype="multipart/form-data">
+        <form action="{{ route('refund_notes.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @include('credit_notes.form')
+            @include('refund_notes.form')
 
             <div class="form-button-container">
-                <button type="submit" class="primary-button" id="btnSubmit">Create Credit Note</button>
+                <button type="submit" class="primary-button" id="btnSubmit">Create Refund Note</button>
             </div>
         </form>
     </div>
