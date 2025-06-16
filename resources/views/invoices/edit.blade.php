@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard', ['title' => 'Edit Invoice #' . $invoice->invoice_no])
 
 @section('content')
     <div>

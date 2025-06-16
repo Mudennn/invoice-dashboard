@@ -1,4 +1,4 @@
-@extends('layouts.dashboard', ['title' => 'Delete Invoice #' . $invoice->invoice_no])
+@extends('layouts.dashboard')
 
 @section('content')
     <div>
@@ -7,15 +7,15 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
                 Back
             </a>
-            <h2>Delete Invoice</h2>
-            <p>Delete the invoice for your customer</p>
+            <h2>Delete Credit Note</h2>
+            <p>Delete the credit note for your customer</p>
         </div>
         <hr>
-        <form action="{{ route('invoices.destroy', $invoice->id) }}" method="POST">
+        <form action="{{ route('credit_notes.destroy', $credit_note->id) }}" method="POST">
             @csrf
             @method('DELETE')
 
-            @include('invoices.form')
+            @include('credit_notes.form')
             <hr>
             <div class="pt-4">
                 <div class="alert alert-danger" role="alert">
@@ -24,7 +24,7 @@
             </div>
 
             <div class="form-button-container">
-                <button type="submit" class="delete-button" id="btnSubmit">Delete Invoice</button>
+                <button type="submit" class="delete-button" id="btnSubmit">Delete Credit Note</button>
             </div>
         </form>
     </div>

@@ -1,4 +1,4 @@
-@extends('layouts.dashboard', ['title' => 'View Items Credit Note #' . $credit_note->credit_note_no])
+@extends('layouts.dashboard')
 
 @section('content')
 <div>
@@ -8,7 +8,7 @@
                 <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
                 Back
             </a>
-            <a href="{{ route('credit_notes.edit', $credit_note->id) }}" class="primary-button">Edit</a>
+            <a href="{{ route('invoices.edit', $invoice->id) }}" class="primary-button">Edit</a>
         </div>
        
         <h2>Credit Note Details</h2>
@@ -28,8 +28,8 @@
                 </tr>
             </thead>
             <tbody>
-                @if(isset($credit_note->creditItems) && count($credit_note->creditItems) > 0)
-                    @foreach($credit_note->creditItems as $index => $item)
+                @if(isset($invoice->invoiceItems) && count($invoice->invoiceItems) > 0)
+                    @foreach($invoice->invoiceItems as $index => $item)
                         <tr>
                             <td class="text-center">{{ $index + 1 }}</td>
                             <td class="text-center">{{ $item->quantity }}</td>
@@ -47,11 +47,11 @@
             <tfoot>
                 <tr>
                     <td colspan="4" class="text-end"><strong>Subtotal</strong></td>
-                    <td>RM {{ isset($credit_note->creditItems) ? number_format($credit_note->creditItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td>RM {{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('amount'), 2) : '0.00' }}</td>
                 </tr>
                 <tr>
                     <td colspan="4" class="text-end"><strong>TOTAL</strong></td>
-                    <td>RM {{ isset($credit_note->creditItems) ? number_format($credit_note->creditItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td>RM {{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('amount'), 2) : '0.00' }}</td>
                 </tr>
             </tfoot>
         </table>

@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard', ['title' => 'Credit Notes'])
 
 @section('content')
     <div style="padding: 40px;">

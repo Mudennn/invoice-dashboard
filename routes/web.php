@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\InvoicesController;
 use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CreditNoteController;
+use App\Http\Controllers\DebitNoteController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -45,11 +46,18 @@ Route::get('credit_notes/{id}', [CreditNoteController::class, 'show'])->name('cr
 Route::delete('credit_notes/{id}', [CreditNoteController::class, 'destroy'])->name('credit_notes.destroy');
 Route::get('credit_notes/{id}/view', [CreditNoteController::class, 'view'])->name('credit_notes.view');
 
+// Debit Note Routes
+Route::get('debit_notes', [DebitNoteController::class, 'index'])->name('debit_notes.index');
+Route::get('debit_notes/create', [DebitNoteController::class, 'create'])->name('debit_notes.create');
+Route::post('debit_notes', [DebitNoteController::class, 'store'])->name('debit_notes.store');
+Route::get('debit_notes/{id}/edit', [DebitNoteController::class, 'edit'])->name('debit_notes.edit');
+Route::patch('debit_notes/{id}', [DebitNoteController::class, 'update'])->name('debit_notes.update');
+Route::get('debit_notes/{id}', [DebitNoteController::class, 'show'])->name('debit_notes.show');
+Route::delete('debit_notes/{id}', [DebitNoteController::class, 'destroy'])->name('debit_notes.destroy');
+Route::get('debit_notes/{id}/view', [DebitNoteController::class, 'view'])->name('debit_notes.view');
 
 
-Route::get('/debit-notes', function () {
-    return view('debit_notes.index');
-})->name('debit_notes.index');
+
 
 Route::get('/company_profile', function () {
     return view('company_profile.index');

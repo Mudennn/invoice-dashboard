@@ -1,4 +1,4 @@
-@extends('layouts.dashboard', ['title' => 'New Credit Note'])
+@extends('layouts.dashboard')
 
 @section('content')
     <div class="relative">

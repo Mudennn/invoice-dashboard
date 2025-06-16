@@ -13,9 +13,11 @@ $menuItems = [
         'hasSubmenu' => true,
         'submenu' => [
             ['text' => 'Invoices', 'route' => 'invoices.index'],
-            ['text' => 'Receipts'],
             ['text' => 'Credit Notes', 'route' => 'credit_notes.index'],
-            ['text' => 'Debit Notes', 'route' => 'debit_notes.index']
+            ['text' => 'Debit Notes', 'route' => 'debit_notes.index'],
+            ['text' => 'Refund Notes'],
+            ['text' => 'Self-Billed Invoices'],
+            ['text' => 'Receipts'],
         ]
     ],
     [

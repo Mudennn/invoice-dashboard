@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard', ['title' => 'Delete Credit Note #' . $credit_note->credit_note_no])
 
 @section('content')
     <div>

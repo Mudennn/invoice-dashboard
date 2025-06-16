@@ -1,4 +1,4 @@
-@extends('layouts.dashboard')
+@extends('layouts.dashboard', ['title' => 'New Invoice'])
 
 @section('content')
     <div class="relative">
