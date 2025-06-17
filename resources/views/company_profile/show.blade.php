@@ -1,5 +1,6 @@
 @extends('layouts.dashboard')
 
+{{-- TAK GUNA --}}
 @section('content')
     <div>
         <div class="d-flex flex-column gap-2" style="padding: 40px;">

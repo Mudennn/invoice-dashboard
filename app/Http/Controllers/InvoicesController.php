@@ -54,7 +54,7 @@ class InvoicesController extends Controller
 
         // Generate next Invoice Number
         $lastInvoice = Invoices::orderBy('invoice_no', 'desc')->first();
-        $nextInvoiceNo = $lastInvoice ? $this->generateNextInvoiceNo($lastInvoice->invoice_no) : 'INV00001';
+        $nextInvoiceNo = $lastInvoice ? $this->generateNextInvoiceNo($lastInvoice->invoice_no) : 'INV0001';
         $invoice->invoice_no = $nextInvoiceNo;
 
         // Get customer list

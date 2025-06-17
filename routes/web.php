@@ -7,6 +7,7 @@ use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\DebitNoteController;
 use App\Http\Controllers\RefundNoteController;
 use App\Http\Controllers\CompanyProfileController;
+use App\Http\Controllers\ReceiptController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -78,3 +79,13 @@ Route::post('company_profile', [CompanyProfileController::class, 'store'])->name
 Route::get('company_profile/{id}/edit', [CompanyProfileController::class, 'edit'])->name('company_profile.edit');
 Route::patch('company_profile/{id}', [CompanyProfileController::class, 'update'])->name('company_profile.update');
 Route::delete('company_profile/{id}', [CompanyProfileController::class, 'destroy'])->name('company_profile.destroy');
+
+// Receipt Routes
+Route::get('receipts', [ReceiptController::class, 'index'])->name('receipts.index');
+Route::get('receipts/create', [ReceiptController::class, 'create'])->name('receipts.create');
+Route::post('receipts', [ReceiptController::class, 'store'])->name('receipts.store');
+Route::get('receipts/{id}/edit', [ReceiptController::class, 'edit'])->name('receipts.edit');
+Route::patch('receipts/{id}', [ReceiptController::class, 'update'])->name('receipts.update');
+Route::get('receipts/{id}', [ReceiptController::class, 'show'])->name('receipts.show');
+Route::delete('receipts/{id}', [ReceiptController::class, 'destroy'])->name('receipts.destroy');
+Route::get('receipts/{id}/view', [ReceiptController::class, 'view'])->name('receipts.view');

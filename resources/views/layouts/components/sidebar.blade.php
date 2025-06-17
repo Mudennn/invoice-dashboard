@@ -17,7 +17,7 @@ $menuItems = [
             ['text' => 'Debit Notes', 'route' => 'debit_notes.index'],
             ['text' => 'Refund Notes', 'route' => 'refund_notes.index'],
             ['text' => 'Self-Billed Invoices'],
-            ['text' => 'Receipts'],
+            ['text' => 'Receipts', 'route' => 'receipts.index'],
         ]
     ],
     [
