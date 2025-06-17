@@ -8,6 +8,7 @@ use App\Http\Controllers\DebitNoteController;
 use App\Http\Controllers\RefundNoteController;
 use App\Http\Controllers\CompanyProfileController;
 use App\Http\Controllers\ReceiptController;
+use App\Http\Controllers\SelfBilledInvoiceController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -89,3 +90,22 @@ Route::patch('receipts/{id}', [ReceiptController::class, 'update'])->name('recei
 Route::get('receipts/{id}', [ReceiptController::class, 'show'])->name('receipts.show');
 Route::delete('receipts/{id}', [ReceiptController::class, 'destroy'])->name('receipts.destroy');
 Route::get('receipts/{id}/view', [ReceiptController::class, 'view'])->name('receipts.view');
+
+
+// Self-Billed Invoice Routes
+Route::get('self_billed_invoices', [SelfBilledInvoiceController::class, 'index'])->name('self_billed_invoices.index');
+Route::get('self_billed_invoices/create', [SelfBilledInvoiceController::class, 'create'])->name('self_billed_invoices.create');
+Route::post('self_billed_invoices', [SelfBilledInvoiceController::class, 'store'])->name('self_billed_invoices.store');
+Route::get('self_billed_invoices/{id}/edit', [SelfBilledInvoiceController::class, 'edit'])->name('self_billed_invoices.edit');
+Route::patch('self_billed_invoices/{id}', [SelfBilledInvoiceController::class, 'update'])->name('self_billed_invoices.update');
+Route::get('self_billed_invoices/{id}', [SelfBilledInvoiceController::class, 'show'])->name('self_billed_invoices.show');
+Route::delete('self_billed_invoices/{id}', [SelfBilledInvoiceController::class, 'destroy'])->name('self_billed_invoices.destroy');
+Route::get('self_billed_invoices/{id}/view', [SelfBilledInvoiceController::class, 'view'])->name('self_billed_invoices.view');
+Route::post('search', [SelfBilledInvoiceController::class, 'search'])->name('self_billed_invoices.search');
+
+// Add generic invoice details endpoint
+Route::get('self_billed_invoices/get-details/{self_billed_invoice_no}', [SelfBilledInvoiceController::class, 'getInvoiceDetails'])
+    ->name('self_billed_invoices.get-details');
+
+// Print Invoice
+Route::get('/self_billed_invoices/{id}/print', [SelfBilledInvoiceController::class, 'print'])->name('self_billed_invoices.print');

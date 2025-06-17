@@ -16,8 +16,18 @@ $menuItems = [
             ['text' => 'Credit Notes', 'route' => 'credit_notes.index'],
             ['text' => 'Debit Notes', 'route' => 'debit_notes.index'],
             ['text' => 'Refund Notes', 'route' => 'refund_notes.index'],
-            ['text' => 'Self-Billed Invoices'],
             ['text' => 'Receipts', 'route' => 'receipts.index'],
+        ]
+    ],
+    [
+        'icon' => 'shopping_cart',
+        'text' => 'Purchases',
+        'hasSubmenu' => true,  
+        'submenu' => [
+            ['text' => 'Self-Billed Invoices', 'route' => 'self_billed_invoices.index'],
+            ['text' => 'Self-Billed Credit Notes', ],
+            ['text' => 'Self-Billed Debit Notes', ],
+            ['text' => 'Self-Billed Refund Notes', ],
         ]
     ],
     [
