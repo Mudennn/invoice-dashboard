@@ -27,7 +27,7 @@
                 <div class="w-100">
                     <label for="customer" class="form-lable">Customer</label>
                     {{-- <input type="text" name="customer" class="form-control" value="{{ $invoice->customer }}" {{$ro}}> --}}
-                    <select name="customer" id="customer" class="form-control form-select" {{ $ro }}>
+                    <select name="customer" id="customer" class="form-control form-select customer-select-input" {{ $ro }}>
                         <option value=""> {{ 'Choose :' }}</option>
                         @foreach ($customers as $customer)
                             @if ($invoice->customer)
@@ -46,9 +46,19 @@
 
                 </div>
                 <div class="w-100">
-                    <label for="shipping_info" class="form-lable">Shipping Info</label>
-                    <input type="text" name="shipping_info" class="form-control"
-                        value="{{ $invoice->shipping_info }}" {{ $ro }}>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="shipping_info" class="form-lable">Shipping Info</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enable-shipping" 
+                                {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="enable-shipping">
+                                Enable Shipping
+                            </label>
+                        </div>
+                    </div>
+                    <input type="text" name="shipping_info" id="shipping_info" class="form-control shipping-field"
+                        value="{{ $invoice->shipping_info }}" {{ $ro }} 
+                        {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? '' : 'disabled' }}>
 
                     @error('shipping_info')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -67,8 +77,9 @@
                 </div>
                 <div class="w-100">
                     <label for="shipping_attention" class="form-lable">Shipping Attention</label>
-                    <input type="text" name="shipping_attention" class="form-control"
-                        value="{{ $invoice->shipping_attention }}" {{ $ro }}>
+                    <input type="text" name="shipping_attention" id="shipping_attention" class="form-control shipping-field"
+                        value="{{ $invoice->shipping_attention }}" {{ $ro }}
+                        {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? '' : 'disabled' }}>
 
                     @error('shipping_attention')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -86,7 +97,8 @@
                 </div>
                 <div class="w-100">
                     <label for="shipping_address" class="form-lable">Shipping Address</label>
-                    <textarea name="shipping_address" class="form-control" {{ $ro }}>{{ $invoice->shipping_address }}</textarea>
+                    <textarea name="shipping_address" id="shipping_address" class="form-control shipping-field" {{ $ro }}
+                        {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? '' : 'disabled' }}>{{ $invoice->shipping_address }}</textarea>
 
                     @error('shipping_address')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -274,160 +286,18 @@
 
     <div class="btn-group col-12 col-md-5 col-lg-3" role="group" aria-label="Basic radio toggle button group">
         <input type="radio" class="btn-check" name="control" id="btnradio1" value="1" autocomplete="off"
-            {{ $invoice->control == 'draft' ? 'checked' : '' }} checked>
+            {{$invoice->control == '1' || $invoice->control == 'draft' ? 'checked' : '' }} checked>
         <label class="btn btn-outline-primary" for="btnradio1">Draft</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio2" value="2" autocomplete="off"
-            {{ $invoice->control == 'pending' ? 'checked' : '' }}>
+            {{ $invoice->control == '2' || $invoice->control == 'pending' ? 'checked' : '' }}>
         <label class="btn btn-outline-primary" for="btnradio2">Pending</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio3" value="3" autocomplete="off"
-            {{ $invoice->control == 'ready' ? 'checked' : '' }}>
+            {{ $invoice->control == '3' || $invoice->control == 'ready' ? 'checked' : '' }}>
         <label class="btn btn-outline-primary" for="btnradio3">Ready</label>
     </div>
 </div>
 
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize row counter
-        let rowCount = {{ isset($invoice->invoiceItems) ? count($invoice->invoiceItems) : 0 }};
-        
-        // Calculate totals on page load
-        calculateTotals();
-        
-        // --------------------------------------------------------------
-        // Form submission handler
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Validate form before submission
-                const errorContainer = document.getElementById('validation-errors');
-                if (errorContainer) {
-                    errorContainer.innerHTML = '';
-                    errorContainer.style.display = 'none';
-                }
-
-                // Show loading state
-                const submitButton = document.getElementById('btnSubmit');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    const originalText = submitButton.innerHTML;
-                    submitButton.innerHTML = 'Processing...';
-                    
-                    // Re-enable the button after form submission
-                    setTimeout(() => {
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = originalText;
-                    }, 3000);
-                }
-
-                // Let the form submit normally to the server
-                // This will ensure Laravel's Alert toast is displayed correctly
-                return true;
-            });
-        }
-        
-        // --------------------------------------------------------------
-        
-        // Add new item row
-        document.getElementById('add-item-btn').addEventListener('click', function() {
-            const tbody = document.getElementById('invoice-items-body');
-            const newRow = document.createElement('tr');
-            newRow.className = 'invoice-item-row';
-            
-            newRow.innerHTML = `
-                <td class="text-center">${rowCount + 1}</td>
-                <td>
-                    <input type="hidden" name="items[${rowCount}][id]" value="">
-                    <input type="number" name="items[${rowCount}][quantity]" class="form-control item-quantity" value="0" min="0">
-                </td>
-                <td>
-                    <input type="text" name="items[${rowCount}][description]" class="form-control" value="">
-                </td>
-                <td>
-                    <input type="number" name="items[${rowCount}][unit_price]" class="form-control item-unit-price" value="0" min="0" step="0.01">
-                </td>
-                <td>
-                    <input type="number" name="items[${rowCount}][amount]" class="form-control item-amount" value="0" readonly step="0.01">
-                    <input type="hidden" name="items[${rowCount}][total]" class="item-total" value="0">
-                </td>
-                <td class="text-center">
-                    <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
-                </td>
-            `;
-            
-            tbody.appendChild(newRow);
-            rowCount++;
-            
-            // Add event listeners to the new row
-            addEventListenersToRow(newRow);
-        });
-        
-        // Add event listeners to existing rows
-        document.querySelectorAll('.invoice-item-row').forEach(row => {
-            addEventListenersToRow(row);
-        });
-        
-        // Function to add event listeners to a row
-        function addEventListenersToRow(row) {
-            // Remove item
-            row.querySelector('.remove-item').addEventListener('click', function() {
-                row.remove();
-                updateRowNumbers();
-                calculateTotals();
-            });
-            
-            // Calculate amount when quantity or unit price changes
-            const quantityInput = row.querySelector('.item-quantity');
-            const unitPriceInput = row.querySelector('.item-unit-price');
-            
-            [quantityInput, unitPriceInput].forEach(input => {
-                input.addEventListener('input', function() {
-                    calculateRowAmount(row);
-                    calculateTotals();
-                });
-            });
-        }
-        
-        // Update row numbers
-        function updateRowNumbers() {
-            document.querySelectorAll('#invoice-items-body tr').forEach((row, index) => {
-                row.querySelector('td:first-child').textContent = index + 1;
-                
-                // Update input names with new indices
-                const inputs = row.querySelectorAll('input');
-                inputs.forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name) {
-                        const newName = name.replace(/items\[\d+\]/, `items[${index}]`);
-                        input.setAttribute('name', newName);
-                    }
-                });
-            });
-        }
-        
-        // Calculate amount for a row
-        function calculateRowAmount(row) {
-            const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-            const unitPrice = parseFloat(row.querySelector('.item-unit-price').value) || 0;
-            const amount = quantity * unitPrice;
-            
-            row.querySelector('.item-amount').value = amount.toFixed(2);
-            row.querySelector('.item-total').value = amount.toFixed(2);
-        }
-        
-        // Calculate totals
-        function calculateTotals() {
-            let subtotal = 0;
-            
-            document.querySelectorAll('.item-amount').forEach(input => {
-                subtotal += parseFloat(input.value) || 0;
-            });
-            
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-            document.getElementById('total').textContent = subtotal.toFixed(2);
-        }
-    });
-    </script>
+<script src="{{ asset('js/invoice-forms.js') }}"></script>
     

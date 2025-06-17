@@ -11,9 +11,9 @@
             <p>Create a new company profile for your company</p>
         </div>
         <hr>
-        <form  method="POST" enctype="multipart/form-data">
+        <form action="{{ route('company_profile.store') }}" method="POST" enctype="multipart/form-data">
             @csrf
-            @include('contacts.form')
+            @include('company_profile.form')
 
             <div class="form-button-container">
                 <button type="submit" class="primary-button" id="btnSubmit">Save Company Profile</button>

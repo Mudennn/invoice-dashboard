@@ -2,8 +2,13 @@
 
 @section('content')
     <div>
-        <div class="d-flex flex-column gap-2" style="padding: 40px;">
-            <h2>Delete Invoice</h2>
+        <div class="d-flex flex-column gap-2 form-header-container">
+            <a href="{{ url()->previous() }}" class="back-button mb-4">
+                <span class="material-symbols-outlined" style="font-size: 16px;">arrow_back</span>
+                Back
+            </a>
+            <h2>Delete Contact</h2>
+            <p>Delete the contact for your company</p>
         </div>
         <hr>
         <form action="{{ route('contacts.destroy', $customer_profile->id) }}" method="POST">

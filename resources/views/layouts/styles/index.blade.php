@@ -281,6 +281,26 @@
 
     /* -------------------------------------------------------------- */
 
+    /* SELECT2 */
+    .select2-container--default .select2-selection--single{
+        padding: 6px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px !important;
+        /* background-color: var(--primary) !important; */
+        width: 100% !important;
+        font-size: 0.875rem !important;
+        height: 42px !important;
+    }
+    .select2-container--default .select2-selection--single .select2-selection__arrow{
+        top: 50% !important;
+        transform: translateY(-50%) !important;
+    }
+
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{
+        background-color: var(--primary) !important;
+    }
+    /* -------------------------------------------------------------- */
+
     /* Mobile styles */
     @media only screen and (max-width: 767px) {
         .main-content {

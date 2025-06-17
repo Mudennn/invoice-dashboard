@@ -23,9 +23,14 @@ class InvoicesController extends Controller
     {
         $invoices = Invoices::select('invoices.*')->where('invoices.status', '0')->orderBy('invoices.created_at', 'desc')->get();
         
-        // FOR API CREDIT NOTE
+        // FOR API fetch invoice for each credit note, debit note, refund note
         // Return JSON response if requested
         if (request()->wantsJson() || request()->has('format') && request()->format === 'json') {
+            // Calculate subtotal for each invoice from its items
+            $invoices->each(function($invoice) {
+                $invoice->subtotal = $invoice->invoiceItems->sum('total');
+            });
+            
             return response()->json($invoices);
         }
         
@@ -354,4 +359,29 @@ class InvoicesController extends Controller
             ], 500);
         }
     }
+
+     // Print Invoice
+     public function print($id)
+     {
+        $invoice = Invoices::with(['invoiceItems' => function ($query) {
+            $query->where('status', '0');
+        }])->findOrFail($id);
+        
+        // Get company profile with state information
+        $ourCompany = DB::table('company_profiles')
+            ->select('company_profiles.*', 'state.selection_data as s_state')
+            ->leftJoin('selections as state', 'company_profiles.state', '=', 'state.id')
+            ->where('company_profiles.status', '0')
+            ->first();
+        
+        // Get customer profile if available with state information
+        $customerProfile = DB::table('customers')
+            ->select('customers.*', 'state.selection_data as s_state')
+            ->leftJoin('selections as state', 'customers.state', '=', 'state.id')
+            ->where('customers.customer_name', $invoice->customer)
+            ->where('customers.status', '0')
+            ->first();
+ 
+        return view('invoices.print', compact('invoice', 'ourCompany', 'customerProfile'));
+     }
 }

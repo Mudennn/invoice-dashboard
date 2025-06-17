@@ -88,7 +88,7 @@ $menuItems = [
             </div>
             <!-- User Dropdown -->
             <div class="dropdown-menu" id="userDropdown">
-                <a class="dropdown-item" style="--index: 1;" href="{{ route('company_profile.edit') }}">
+                <a class="dropdown-item" style="--index: 1;" href="{{ route('company_profile.index') }}">
                     <div class="d-flex align-items-center">
                         <span class="material-symbols-outlined me-2">settings</span>
                         Company Profile

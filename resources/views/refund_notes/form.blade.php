@@ -29,7 +29,7 @@
                 <div class="w-100">
                     <label for="customer" class="form-lable">Customer</label>
                     {{-- <input type="text" name="customer" class="form-control" value="{{ $invoice->customer }}" {{$ro}}> --}}
-                    <select name="customer" id="customer" class="form-control form-select" {{ $ro }}>
+                    <select name="customer" id="customer" class="form-control form-select customer-select-input" {{ $ro }}>
                         <option value=""> {{ 'Choose :' }}</option>
                         @foreach ($customers as $customer)
                             @if ($refund_note->customer)
@@ -48,9 +48,19 @@
 
                 </div>
                 <div class="w-100">
-                    <label for="shipping_info" class="form-lable">Shipping Info</label>
-                    <input type="text" name="shipping_info" class="form-control"
-                        value="{{ $refund_note->shipping_info }}" {{ $ro }}>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <label for="shipping_info" class="form-lable">Shipping Info</label>
+                        <div class="form-check">
+                            <input class="form-check-input" type="checkbox" id="enable-shipping" 
+                                {{ ($refund_note->shipping_info || $refund_note->shipping_attention || $refund_note->shipping_address) ? 'checked' : '' }}>
+                            <label class="form-check-label" for="enable-shipping">
+                                Enable Shipping
+                            </label>
+                        </div>
+                    </div>
+                    <input type="text" name="shipping_info" id="shipping_info" class="form-control shipping-field"
+                        value="{{ $refund_note->shipping_info }}" {{ $ro }} 
+                        {{ ($refund_note->shipping_info || $refund_note->shipping_attention || $refund_note->shipping_address) ? '' : 'disabled' }}>
 
                     @error('shipping_info')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -69,8 +79,9 @@
                 </div>
                 <div class="w-100">
                     <label for="shipping_attention" class="form-lable">Shipping Attention</label>
-                    <input type="text" name="shipping_attention" class="form-control"
-                        value="{{ $refund_note->shipping_attention }}" {{ $ro }}>
+                    <input type="text" name="shipping_attention" id="shipping_attention" class="form-control shipping-field"
+                        value="{{ $refund_note->shipping_attention }}" {{ $ro }}
+                        {{ ($refund_note->shipping_info || $refund_note->shipping_attention || $refund_note->shipping_address) ? '' : 'disabled' }}>
 
                     @error('shipping_attention')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -88,7 +99,8 @@
                 </div>
                 <div class="w-100">
                     <label for="shipping_address" class="form-lable">Shipping Address</label>
-                    <textarea name="shipping_address" class="form-control" {{ $ro }}>{{ $refund_note->shipping_address }}</textarea>
+                    <textarea name="shipping_address" id="shipping_address" class="form-control shipping-field" {{ $ro }}
+                        {{ ($refund_note->shipping_info || $refund_note->shipping_attention || $refund_note->shipping_address) ? '' : 'disabled' }}>{{ $refund_note->shipping_address }}</textarea>
 
                     @error('shipping_address')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -204,7 +216,9 @@
         <h3>Items</h3>
         <p class="sub-text">Items for the invoice</p>
     </div>
-    <button type="button" class="btn btn-primary mb-3" id="select-invoice-btn">Select Invoice</button>
+    <button type="button" class="btn btn-primary mb-3" id="select-invoice-btn" 
+        data-index-route="{{ route('invoices.index') }}?format=json"
+        data-details-route="{{ route('invoices.get-details', ['invoice_no' => ':invoice_no']) }}">Select Invoice</button>
     <div class="table-responsive" style="overflow-y: auto;">
         <table class="table table-hover table-bordered align-middle text-nowrap" id="invoice-items-table">
             <thead class="thead-light">
@@ -277,380 +291,41 @@
 
     <div class="btn-group col-12 col-md-5 col-lg-3" role="group" aria-label="Basic radio toggle button group">
         <input type="radio" class="btn-check" name="control" id="btnradio1" value="1" autocomplete="off"
-            {{ $refund_note->control == 'draft' ? 'checked' : '' }} checked>
+            {{ $refund_note->control == '1' || $refund_note->control == 'draft' ? 'checked' : '' }} checked>
         <label class="btn btn-outline-primary" for="btnradio1">Draft</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio2" value="2" autocomplete="off"
-            {{ $refund_note->control == 'pending' ? 'checked' : '' }}>
+            {{ $refund_note->control == '2' || $refund_note->control == 'pending' ? 'checked' : '' }}>
         <label class="btn btn-outline-primary" for="btnradio2">Pending</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio3" value="3" autocomplete="off"
-            {{ $refund_note->control == 'ready' ? 'checked' : '' }}>
+            {{ $refund_note->control == '3' || $refund_note->control == 'ready' ? 'checked' : '' }}>
         <label class="btn btn-outline-primary" for="btnradio3">Ready</label>
     </div>
 </div>
 
-
-<script>
-    document.addEventListener('DOMContentLoaded', function() {
-        // Initialize row counter
-        let rowCount = {{ isset($refund_note->refundItems) ? count($refund_note->refundItems) : 0 }};
-        
-        // Calculate totals on page load
-        calculateTotals();
-        
-        // --------------------------------------------------------------
-        // Invoice Selection Modal
-        
-        // Open invoice selection modal
-        document.getElementById('select-invoice-btn').addEventListener('click', function() {
-            // Fetch available invoices
-            fetch('{{ route('invoices.index') }}?format=json')
-                .then(response => response.json())
-                .then(data => {
-                    populateInvoiceSelectionTable(data);
-                    const modal = new bootstrap.Modal(document.getElementById('invoiceSelectionModal'));
-                    modal.show();
-                })
-                .catch(error => {
-                    console.error('Error fetching invoices:', error);
-                    alert('Failed to load invoices. Please try again.');
-                });
-        });
-        
-        // Populate invoice selection table
-        function populateInvoiceSelectionTable(invoices) {
-            const tableBody = document.querySelector('#invoice-selection-table tbody');
-            tableBody.innerHTML = '';
-            
-            if (invoices && invoices.length > 0) {
-                invoices.forEach(invoice => {
-                    const row = document.createElement('tr');
-                    
-                    // Format date if it exists
-                    const invoiceDate = invoice.invoice_date ? new Date(invoice.invoice_date).toLocaleDateString() : 'N/A';
-                    
-                    row.innerHTML = `
-                        <td>${invoice.invoice_no || 'N/A'}</td>
-                        <td>${invoiceDate}</td>
-                        <td>${invoice.customer || 'N/A'}</td>
-                        <td>RM ${parseFloat(invoice.subtotal || 0).toFixed(2)}</td>
-                        <td>
-                            <button type="button" class="btn btn-sm btn-primary select-invoice-btn" 
-                                data-invoice-no="${invoice.invoice_no}">
-                                Select
-                            </button>
-                        </td>
-                    `;
-                    
-                    tableBody.appendChild(row);
-                });
-                
-                // Add event listeners to select buttons
-                document.querySelectorAll('.select-invoice-btn').forEach(button => {
-                    button.addEventListener('click', function() {
-                        const invoiceNo = this.getAttribute('data-invoice-no');
-                        loadInvoiceDetails(invoiceNo);
-                        
-                        // Set the invoice number in the form
-                        document.querySelector('input[name="invoice_no"]').value = invoiceNo;
-                        
-                        // Close the modal
-                        bootstrap.Modal.getInstance(document.getElementById('invoiceSelectionModal')).hide();
-                    });
-                });
-            } else {
-                // No invoices available
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td colspan="5" class="text-center">No invoices available</td>
-                `;
-                tableBody.appendChild(row);
-            }
-        }
-        
-        /**
-         * Fetches and displays invoice details from the server
-         * @param {string} invoice_no - The invoice number to fetch details for
-         */
-        function loadInvoiceDetails(invoice_no) {
-            // Check if we're in edit mode by looking for an ID
-            const isEditMode = document.querySelector('input[name="id"]')?.value;
-            const oldItems = [];  // Replace with your old items logic if needed
-
-            fetch(`{{ route('invoices.get-details', ['invoice_no' => ':invoice_no']) }}`.replace(':invoice_no', invoice_no))
-                .then(response => {
-                    if (!response.ok) {
-                        throw new Error('Network response was not ok');
-                    }
-                    return response.json();
-                })
-                .then(data => {
-                    console.log('Received invoice data:', data); // Debug log
-
-                    // Set invoice UUID from invoice_uuid
-                    if (data.invoice_uuid) {
-                        document.querySelector('input[name="invoice_uuid"]').value = data.invoice_uuid;
-                    }
-
-                    // Clear existing items
-                    const itemsTableBody = document.getElementById('invoice-items-body');
-                    itemsTableBody.innerHTML = '';
-                    rowCount = 0;
-
-                    // Add invoice items to the refund note
-                    if (data.items && data.items.length > 0) {
-                        data.items.forEach((item, index) => {
-                            const newRow = document.createElement('tr');
-                            newRow.className = 'invoice-item-row';
-                            
-                            newRow.innerHTML = `
-                                <td class="text-center">${index + 1}</td>
-                                <td>
-                                    <input type="hidden" name="items[${index}][id]" value="">
-                                    <input type="number" name="items[${index}][quantity]" class="form-control item-quantity" value="${item.quantity}" min="0">
-                                </td>
-                                <td>
-                                    <input type="text" name="items[${index}][description]" class="form-control" value="${item.description}">
-                                </td>
-                                <td>
-                                    <input type="number" name="items[${index}][unit_price]" class="form-control item-unit-price" value="${item.unit_price}" min="0" step="0.01">
-                                </td>
-                                <td>
-                                    <input type="number" name="items[${index}][amount]" class="form-control item-amount" value="${item.amount}" readonly step="0.01">
-                                    <input type="hidden" name="items[${index}][total]" class="item-total" value="${item.total}">
-                                </td>
-                                <td class="text-center">
-                                    <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
-                                </td>
-                            `;
-                            
-                            itemsTableBody.appendChild(newRow);
-                            rowCount++;
-                            
-                            // Add event listeners to the new row
-                            addEventListenersToRow(newRow);
-                        });
-                        
-                        // Update customer information if available
-                        if (data.customer) {
-                            const customerSelect = document.querySelector('select[name="customer"]');
-                            if (customerSelect) {
-                                for (let i = 0; i < customerSelect.options.length; i++) {
-                                    if (customerSelect.options[i].value === data.customer) {
-                                        customerSelect.selectedIndex = i;
-                                        break;
-                                    }
-                                }
-                            }
-                        }
-                        
-                        // Fill billing/shipping information if available
-                        if (data.billing_address) document.querySelector('textarea[name="billing_address"]').value = data.billing_address;
-                        if (data.shipping_address) document.querySelector('textarea[name="shipping_address"]').value = data.shipping_address;
-                        if (data.billing_attention) document.querySelector('input[name="billing_attention"]').value = data.billing_attention;
-                        if (data.shipping_attention) document.querySelector('input[name="shipping_attention"]').value = data.shipping_attention;
-                        if (data.shipping_info) document.querySelector('input[name="shipping_info"]').value = data.shipping_info;
-                        
-                        // Calculate totals
-                        calculateTotals();
-                    }
-                })
-                .catch(error => {
-                    console.error('Error loading invoice details:', error);
-                    alert('Failed to load invoice details. Please try again.');
-                });
-        }
-        
-        // --------------------------------------------------------------
-        // To make sure the form is submitted correctly and the data is not lost when the page is refreshed
-        // Form submission handler
-        const form = document.querySelector('form');
-        if (form) {
-            form.addEventListener('submit', function(e) {
-                // Validate form before submission
-                const errorContainer = document.getElementById('validation-errors');
-                if (errorContainer) {
-                    errorContainer.innerHTML = '';
-                    errorContainer.style.display = 'none';
-                }
-
-                // Show loading state
-                const submitButton = document.getElementById('btnSubmit');
-                if (submitButton) {
-                    submitButton.disabled = true;
-                    const originalText = submitButton.innerHTML;
-                    submitButton.innerHTML = 'Processing...';
-                    
-                    // Re-enable the button after form submission
-                    setTimeout(() => {
-                        submitButton.disabled = false;
-                        submitButton.innerHTML = originalText;
-                    }, 3000);
-                }
-
-                // Let the form submit normally to the server
-                // This will ensure Laravel's Alert toast is displayed correctly
-                return true;
-            });
-        }
-        
-        // Display validation errors
-        function displayErrors(errors) {
-            const errorContainer = document.getElementById('validation-errors');
-            if (!errorContainer) return;
-            
-            // console.log('Errors received:', errors); // Debug log
-            
-            let errorList = '<ul class="list-unstyled mb-0">';
-            
-            if (typeof errors === 'object' && errors !== null) {
-                // Handle Laravel's validation error format
-                Object.keys(errors).forEach(field => {
-                    if (Array.isArray(errors[field])) {
-                        errors[field].forEach(message => {
-                            errorList += `<li>${message}</li>`;
-                        });
-                    } else if (typeof errors[field] === 'string') {
-                        errorList += `<li>${errors[field]}</li>`;
-                    }
-                });
-            } else if (typeof errors === 'string') {
-                errorList += `<li>${errors}</li>`;
-            } else if (Array.isArray(errors)) {
-                errors.forEach(message => {
-                    errorList += `<li>${message}</li>`;
-                });
-            }
-            
-            errorList += '</ul>';
-            errorContainer.innerHTML = errorList;
-            errorContainer.style.display = 'block';
-            
-            // Scroll to error messages
-            errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
-        }
-        
-        // --------------------------------------------------------------
-        
-        // Add new item row
-        document.getElementById('add-item-btn').addEventListener('click', function() {
-            const tbody = document.getElementById('invoice-items-body');
-            const newRow = document.createElement('tr');
-            newRow.className = 'invoice-item-row';
-            
-            newRow.innerHTML = `
-                <td class="text-center">${rowCount + 1}</td>
-                <td>
-                    <input type="hidden" name="items[${rowCount}][id]" value="">
-                    <input type="number" name="items[${rowCount}][quantity]" class="form-control item-quantity" value="0" min="0">
-                </td>
-                <td>
-                    <input type="text" name="items[${rowCount}][description]" class="form-control" value="">
-                </td>
-                <td>
-                    <input type="number" name="items[${rowCount}][unit_price]" class="form-control item-unit-price" value="0" min="0" step="0.01">
-                </td>
-                <td>
-                    <input type="number" name="items[${rowCount}][amount]" class="form-control item-amount" value="0" readonly step="0.01">
-                    <input type="hidden" name="items[${rowCount}][total]" class="item-total" value="0">
-                </td>
-                <td class="text-center">
-                    <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
-                </td>
-            `;
-            
-            tbody.appendChild(newRow);
-            rowCount++;
-            
-            // Add event listeners to the new row
-            addEventListenersToRow(newRow);
-        });
-        
-        // Add event listeners to existing rows
-        document.querySelectorAll('.invoice-item-row').forEach(row => {
-            addEventListenersToRow(row);
-        });
-        
-        // Function to add event listeners to a row
-        function addEventListenersToRow(row) {
-            // Remove item
-            row.querySelector('.remove-item').addEventListener('click', function() {
-                row.remove();
-                updateRowNumbers();
-                calculateTotals();
-            });
-            
-            // Calculate amount when quantity or unit price changes
-            const quantityInput = row.querySelector('.item-quantity');
-            const unitPriceInput = row.querySelector('.item-unit-price');
-            
-            [quantityInput, unitPriceInput].forEach(input => {
-                input.addEventListener('input', function() {
-                    calculateRowAmount(row);
-                    calculateTotals();
-                });
-            });
-        }
-        
-        // Update row numbers
-        function updateRowNumbers() {
-            document.querySelectorAll('#invoice-items-body tr').forEach((row, index) => {
-                row.querySelector('td:first-child').textContent = index + 1;
-                
-                // Update input names with new indices
-                const inputs = row.querySelectorAll('input');
-                inputs.forEach(input => {
-                    const name = input.getAttribute('name');
-                    if (name) {
-                        const newName = name.replace(/items\[\d+\]/, `items[${index}]`);
-                        input.setAttribute('name', newName);
-                    }
-                });
-            });
-        }
-        
-        // Calculate amount for a row
-        function calculateRowAmount(row) {
-            const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-            const unitPrice = parseFloat(row.querySelector('.item-unit-price').value) || 0;
-            const amount = quantity * unitPrice;
-            
-            row.querySelector('.item-amount').value = amount.toFixed(2);
-            row.querySelector('.item-total').value = amount.toFixed(2);
-        }
-        
-        // Calculate totals
-        function calculateTotals() {
-            let subtotal = 0;
-            
-            document.querySelectorAll('.item-amount').forEach(input => {
-                subtotal += parseFloat(input.value) || 0;
-            });
-            
-            document.getElementById('subtotal').textContent = subtotal.toFixed(2);
-            document.getElementById('total').textContent = subtotal.toFixed(2);
-        }
-    });
-</script>
+<script src="{{ asset('js/invoice-forms.js') }}"></script>
 
 <!-- Invoice Selection Modal -->
 <div class="modal fade" id="invoiceSelectionModal" tabindex="-1" aria-labelledby="invoiceSelectionModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="invoiceSelectionModalLabel">Select Invoice</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
+                <div class="mb-3">
+                    <input type="text" id="invoice-search" class="form-control" placeholder="Search invoices...">
+                </div>
                 <div class="table-responsive">
-                    <table class="table table-hover table-bordered align-middle" id="invoice-selection-table">
+                    <table class="table table-hover table-bordered align-middle" id="invoice-selection-table" >
                         <thead class="thead-light">
                             <tr>
                                 <th>Invoice No</th>
                                 <th>Date</th>
                                 <th>Customer</th>
-                                <th>Amount</th>
+                                <th>Subtotal</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -659,6 +334,23 @@
                         </tbody>
                     </table>
                 </div>
+                <div class="d-flex justify-content-between align-items-center mt-3">
+                    <div>
+                        <span id="showing-entries">Showing 0 to 0 of 0 entries</span>
+                    </div>
+                    <div>
+                        <nav aria-label="Invoice pagination">
+                            <ul class="pagination mb-0">
+                                <li class="page-item disabled" id="prev-page">
+                                    <a class="page-link" href="#" tabindex="-1">Previous</a>
+                                </li>
+                                <li class="page-item disabled" id="next-page">
+                                    <a class="page-link" href="#">Next</a>
+                                </li>
+                            </ul>
+                        </nav>
+                    </div>
+                </div>
             </div>
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
@@ -666,4 +358,3 @@
         </div>
     </div>
 </div>
-    

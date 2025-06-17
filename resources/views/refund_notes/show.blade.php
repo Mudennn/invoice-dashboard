@@ -17,7 +17,7 @@
 
             @include('refund_notes.form')
             <hr>
-            <div class="pt-4">
+            <div style="padding: 32px 32px 16px 32px;">
                 <div class="alert alert-danger" role="alert">
                     Are you sure want to delete?
                 </div>

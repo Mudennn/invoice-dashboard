@@ -23,8 +23,8 @@
                     <th class="text-center" style="width: 5%;">No</th>
                     <th class="text-center" style="width: 10%;">Quantity</th>
                     <th style="width: 50%;">Description</th>
-                    <th style="width: 15%;">Unit Price</th>
-                    <th style="width: 20%;">Amount</th>
+                    <th style="width: 15%;" class="text-end">Unit Price</th>
+                    <th style="width: 20%;" class="text-end">Amount</th>
                 </tr>
             </thead>
             <tbody>
@@ -34,8 +34,8 @@
                             <td class="text-center">{{ $index + 1 }}</td>
                             <td class="text-center">{{ $item->quantity }}</td>
                             <td>{{ $item->description }}</td>
-                            <td>RM {{ number_format($item->unit_price, 2) }}</td>
-                            <td>RM {{ number_format($item->amount, 2) }}</td>
+                            <td class="text-end">RM{{ number_format($item->unit_price, 2) }}</td>
+                            <td class="text-end">RM{{ number_format($item->amount, 2) }}</td>
                         </tr>
                     @endforeach
                 @else
@@ -47,11 +47,11 @@
             <tfoot>
                 <tr>
                     <td colspan="4" class="text-end"><strong>Subtotal</strong></td>
-                    <td>RM {{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td class="text-end">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
                 </tr>
                 <tr>
                     <td colspan="4" class="text-end"><strong>TOTAL</strong></td>
-                    <td>RM {{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td class="text-end fw-bold">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
                 </tr>
             </tfoot>
         </table>

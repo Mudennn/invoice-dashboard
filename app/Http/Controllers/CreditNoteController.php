@@ -57,7 +57,7 @@ class CreditNoteController extends Controller
         //Increment the number
         $number++;
 
-        return 'INV' . str_pad((string) $number, 4, '0', STR_PAD_LEFT);
+        return 'CN' . str_pad((string) $number, 4, '0', STR_PAD_LEFT);
     }
 
     public function create()

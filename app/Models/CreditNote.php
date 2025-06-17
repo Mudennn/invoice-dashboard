@@ -22,4 +22,15 @@ class CreditNote extends Model
     {
         return $this->hasMany(CreditNoteItems::class);
     }
+
+    public function getControlTextAttribute()
+    {
+        $types = [
+            '1' => 'Draft',
+            '2' => 'Pending',
+            '3' => 'Ready',
+        ];
+
+        return $types[$this->control] ?? $this->control;
+    }
 }

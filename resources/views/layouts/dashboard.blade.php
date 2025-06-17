@@ -15,6 +15,7 @@
     @include('layouts.styles.sidebar')
     @include('layouts.styles.mobile_header')
     @include('layouts.styles.from')
+    @include('layouts.styles.profile')
 </head>
 
 <body class="bg-background">

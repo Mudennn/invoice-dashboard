@@ -14,19 +14,19 @@
                         <th scope="col" style="width: 10%;">Invoice No</th>
                         <th scope="col" style="width: 10%;">Invoice Date</th>
                         <th scope="col" style="width: 40%;">Customer</th>
-                        <th scope="col" style="width: 10%;">Amount</th>
+                        <th scope="col" style="width: 10%;">Subtotal</th>
                         <th scope="col" style="width: 10%;">Status</th>
                         <th scope="col" style="width: 5%;"></th>
                     </tr>
                 </thead>
                 <tbody>
-                    @foreach ($invoices as $invoice)
+                    @foreach ($invoices as $index => $invoice)
                         <tr>
-                            <td>{{ $invoice->id }}</td>
+                            <td class="text-center">{{ $index + 1 }}</td>
                             <td>{{ $invoice->invoice_no }}</td>
                             <td>{{ $invoice->invoice_date }}</td>
                             <td>{{ $invoice->customer }}</td>
-                            <td>{{ $invoice->amount }}</td>
+                            <td>RM{{ number_format($invoice->invoiceItems->first()->subtotal ?? 0, 2) }}</td>
                             @php
                                 $control_text = $invoice->control_text;
                                 if ($control_text == 'Draft') {
@@ -64,12 +64,12 @@
                                                     class="material-symbols-outlined" style="font-size: 14px">
                                                     list_alt
                                                 </span> View Items</a></li>
-                                        {{-- <li><a href="{{ route('invoices.print', $invoice->id) }}" class="dropdown-item"
+                                        <li><a href="{{ route('invoices.print', $invoice->id) }}" class="dropdown-item"
                                                     target="_blank"
                                                     style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span
                                                         class="material-symbols-outlined" style="font-size: 14px">
                                                         print
-                                                    </span> Print Invoice</a></li> --}}
+                                                    </span> Print Invoice</a></li>
                                         <li><a href="{{ route('invoices.destroy', $invoice->id) }}"
                                                 class="dropdown-item text-danger" href="#"
                                                 style="display: flex; justify-content: start; align-items: center; gap:8px; font-size:14px;"><span

@@ -15,6 +15,7 @@
                         <th style="width: 5%;">Invoice No</th>
                         <th style="width: 5%;">Date</th>
                         <th style="width: 20%;">Company Name</th>
+                        <th style="width: 5%;">Status</th>
                         <th style="width: 5%;" class="text-end">Subtotal</th>
                         <th style="width: 5%;">Actions</th>
                     </tr>
@@ -27,7 +28,18 @@
                             <td>{{ $refund_note->invoice_no }}</td>
                             <td>{{ $refund_note->refund_note_date }}</td>
                             <td>{{ $refund_note->customer }}</td>
-                            <td class="text-end">{{ number_format($refund_note->subtotal, 2) }}</td>
+                            @php
+                                $control_text = $refund_note->control_text;
+                                if ($control_text == 'Draft') {
+                                    $badge_color = 'bg-warning';
+                                } elseif ($control_text == 'Pending') {
+                                    $badge_color = 'bg-info';
+                                } elseif ($control_text == 'Ready') {
+                                    $badge_color = 'bg-success';
+                                }
+                            @endphp
+                            <td><span class="badge {{ $badge_color }}">{{ $control_text }}</span></td> 
+                            <td class="text-end">RM{{ number_format($refund_note->refundItems->first()->subtotal ?? 0, 2) }}</td>
                             <td class="text-center">
                                 <div class="dropdown">
                                     <button class="hide-arrow p-0 border-0" type="button" id="dropdownMenuButton1"

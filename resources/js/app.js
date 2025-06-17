@@ -7,6 +7,9 @@ window.bootstrap = bootstrap; // Make bootstrap globally available
 import jQuery from 'jquery';
 window.$ = window.jQuery = jQuery;
 
+import select2 from "select2"
+select2(); 
+
 // Import DataTable and initialize it with jQuery
 import DataTable from 'datatables.net-bs5';
 import 'datatables.net-buttons-bs5'

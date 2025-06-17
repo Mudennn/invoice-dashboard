@@ -6,6 +6,7 @@ use App\Http\Controllers\CustomerController;
 use App\Http\Controllers\CreditNoteController;
 use App\Http\Controllers\DebitNoteController;
 use App\Http\Controllers\RefundNoteController;
+use App\Http\Controllers\CompanyProfileController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -67,13 +68,13 @@ Route::get('refund_notes/{id}', [RefundNoteController::class, 'show'])->name('re
 Route::delete('refund_notes/{id}', [RefundNoteController::class, 'destroy'])->name('refund_notes.destroy');
 Route::get('refund_notes/{id}/view', [RefundNoteController::class, 'view'])->name('refund_notes.view');
 
+// Print Invoice
+Route::get('/invoices/{id}/print', [InvoicesController::class, 'print'])->name('invoices.print');
 
-
-
-Route::get('/company_profile', function () {
-    return view('company_profile.index');
-})->name('company_profile.index');
-
-Route::get('/company_profile/edit', function () {
-    return view('company_profile.edit');
-})->name('company_profile.edit');
+// Company Profile Routes
+Route::get('company_profile', [CompanyProfileController::class, 'index'])->name('company_profile.index');
+Route::get('company_profile/create', [CompanyProfileController::class, 'create'])->name('company_profile.create');
+Route::post('company_profile', [CompanyProfileController::class, 'store'])->name('company_profile.store');
+Route::get('company_profile/{id}/edit', [CompanyProfileController::class, 'edit'])->name('company_profile.edit');
+Route::patch('company_profile/{id}', [CompanyProfileController::class, 'update'])->name('company_profile.update');
+Route::delete('company_profile/{id}', [CompanyProfileController::class, 'destroy'])->name('company_profile.destroy');
