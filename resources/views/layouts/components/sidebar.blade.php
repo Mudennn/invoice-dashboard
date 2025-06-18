@@ -40,7 +40,10 @@
             'icon' => 'settings',
             'text' => 'Settings',
             'hasSubmenu' => true,
-            'submenu' => [['text' => 'Taxes', 'route' => 'taxes.index']],
+            'submenu' => [
+                ['text' => 'Taxes', 'route' => 'taxes.index'],
+                ['text' => 'Classifications', 'route' => 'classifications.index'],
+            ],
         ],
     ];
 @endphp

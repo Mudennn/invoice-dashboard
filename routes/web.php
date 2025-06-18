@@ -10,6 +10,7 @@ use App\Http\Controllers\CompanyProfileController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SelfBilledInvoiceController;
 use App\Http\Controllers\TaxController;
+use App\Http\Controllers\ClassificationController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -121,3 +122,13 @@ Route::patch('taxes/{id}', [TaxController::class, 'update'])->name('taxes.update
 Route::get('taxes/{id}', [TaxController::class, 'show'])->name('taxes.show');
 Route::delete('taxes/{id}', [TaxController::class, 'destroy'])->name('taxes.destroy');
 Route::get('taxes/{id}/view', [TaxController::class, 'view'])->name('taxes.view');
+
+// Classification Routes
+Route::get('classifications', [ClassificationController::class, 'index'])->name('classifications.index');
+Route::get('classifications/create', [ClassificationController::class, 'create'])->name('classifications.create');
+Route::post('classifications', [ClassificationController::class, 'store'])->name('classifications.store');
+Route::get('classifications/{id}/edit', [ClassificationController::class, 'edit'])->name('classifications.edit');
+Route::patch('classifications/{id}', [ClassificationController::class, 'update'])->name('classifications.update');
+Route::get('classifications/{id}', [ClassificationController::class, 'show'])->name('classifications.show');
+Route::delete('classifications/{id}', [ClassificationController::class, 'destroy'])->name('classifications.destroy');
+Route::get('classifications/{id}/view', [ClassificationController::class, 'view'])->name('classifications.view');
