@@ -9,6 +9,7 @@ use App\Http\Requests\InvoiceFormRequest;
 use Illuminate\Support\Str;
 use App\Models\Customer;
 use App\Models\Selections;
+use App\Models\Taxes;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 
@@ -31,7 +32,13 @@ class InvoicesController extends Controller
                 $invoice->subtotal = $invoice->invoiceItems->sum('total');
             });
             
-            return response()->json($invoices);
+            // Get tax list for the response
+            $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+            
+            return response()->json([
+                'invoices' => $invoices,
+                'taxesData' => $taxes
+            ]);
         }
         
         return view('invoices.index', compact('invoices'));
@@ -60,9 +67,11 @@ class InvoicesController extends Controller
         // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
+        // Get tax list
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
         $ro = '';
 
-        return view('invoices.create', compact('invoice', 'customers', 'ro'));
+        return view('invoices.create', compact('invoice', 'customers', 'taxes', 'ro'));
     }
 
     public function store(InvoiceFormRequest $request)
@@ -76,7 +85,17 @@ class InvoicesController extends Controller
             $invoiceUuid = $request->invoice_uuid ?? Str::uuid()->toString();
 
             // Calculate total amount
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Create Invoice
             $invoice = Invoices::create([
@@ -112,6 +131,11 @@ class InvoicesController extends Controller
                         'total' => $item['total'],
                         'subtotal' => $subtotal,
                         'currency_code' => 'MYR',
+                        'tax_type' => $item['tax_type'] ?? null,
+                        'tax_code' => $item['tax_code'] ?? null,
+                        'tax_rate' => $item['tax_rate'] ?? 0,
+                        'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                        'tax_amount' => $item['tax_amount'] ?? 0,
                         'status' => '0',
                     ]);
                 }
@@ -155,9 +179,12 @@ class InvoicesController extends Controller
             ->where('selection_type', 'state')
             ->where('status', '0')
             ->get();
+
+        // Get tax list
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
         $ro = '';
 
-        return view('invoices.edit', compact('invoice', 'customers', 'states', 'ro'));
+        return view('invoices.edit', compact('invoice', 'customers', 'states', 'taxes', 'ro'));
     }
 
     public function update(InvoiceFormRequest $request, $id)
@@ -172,7 +199,17 @@ class InvoicesController extends Controller
             $invoiceUuid = $request->invoice_uuid ?? Str::uuid()->toString();
 
             // Calculate total amount
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Update Invoice
             $invoice->update([
@@ -214,6 +251,11 @@ class InvoicesController extends Controller
                             'amount' => $item['amount'],
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                             'currency_code' => 'MYR',
                         ]);
                         $processedIds[] = $item['id'];
@@ -227,6 +269,11 @@ class InvoicesController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                             'status' => '0',
                         ]);
                     }
@@ -276,9 +323,12 @@ class InvoicesController extends Controller
             ->where('selection_type', 'state')
             ->where('status', '0')
             ->get();
+
+        // Get tax list
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
         $ro = '';
 
-        return view('invoices.show', compact('invoice', 'customers', 'states', 'ro'));
+        return view('invoices.show', compact('invoice', 'customers', 'states', 'taxes', 'ro'));
     }
 
     public function view($id)
@@ -324,6 +374,9 @@ class InvoicesController extends Controller
                 ], 404);
             }
             
+            // Get tax list for the response
+            $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+            
             // Format the response with items
             $response = [
                 'invoice_no' => $invoice->invoice_no,
@@ -336,6 +389,7 @@ class InvoicesController extends Controller
                 'shipping_address' => $invoice->shipping_address,
                 'shipping_info' => $invoice->shipping_info,
                 'reference_number' => $invoice->reference_number,
+                'taxesData' => $taxes,
                 'items' => []
             ];
             
@@ -346,7 +400,12 @@ class InvoicesController extends Controller
                     'description' => $item->description,
                     'unit_price' => $item->unit_price,
                     'amount' => $item->amount,
-                    'total' => $item->total
+                    'total' => $item->total,
+                    'tax_type' => $item->tax_type,
+                    'tax_code' => $item->tax_code,
+                    'tax_rate' => $item->tax_rate,
+                    'excluding_tax' => $item->{'excluding_tax'},
+                    'tax_amount' => $item->tax_amount,
                 ];
             }
             

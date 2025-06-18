@@ -15,7 +15,6 @@
     <div class="alert alert-danger" id="validation-errors" style="display: none;"></div>
 @endif
 
-
 {{-- Shipping Information --}}
 <div class="input-form form-input-container">
     <div class="d-flex flex-column gap-2 mb-4">
@@ -228,6 +227,7 @@
                     <th scope="col" style="width: 40%;">Description</th>
                     <th scope="col" style="width: 10%;">Unit Price</th>
                     <th scope="col" style="width: 10%;">Amount</th>
+                    <th scope="col" style="width: 10%;">Tax</th>
                     <th scope="col" style="width: 5%;"></th>
                 </tr>
             </thead>
@@ -250,6 +250,20 @@
                             <input type="number" name="items[{{ $index }}][amount]" class="form-control item-amount" value="{{ $item->amount }}" readonly step="0.01" {{ $ro }}>
                             <input type="hidden" name="items[{{ $index }}][total]" class="item-total" value="{{ $item->total }}">
                         </td>
+                        <td>
+                            <select name="items[{{ $index }}][tax_type]" class="form-control item-tax"
+                            {{ $ro }}>
+                            <option value=""> {{ 'Choose :' }}</option>
+                            @foreach ($taxes as $tax)
+                                <option value="{{ $tax->tax_type }}"
+                                    data-tax-code="{{ $tax->tax_code }}" 
+                                    data-tax-rate="{{ $tax->tax_rate }}"
+                                    {{ $item->tax_type == $tax->tax_type ? 'selected' : '' }}>
+                                    {{ $tax->tax_code }} - {{ $tax->tax_type }} ({{ $tax->tax_rate }}%)</option>
+                            @endforeach
+                        </select>
+                        <input type="hidden" name="items[{{ $index }}][tax_code]" class="item-tax-code" value="{{ $item->tax_code ?? '' }}">
+                        </td>
                         <td class="text-center">
                             <button type="button" class="delete-icon-button remove-item" {{ $ro }}>
                                 <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
@@ -267,6 +281,14 @@
         <button type="button" class="primary-button" id="add-item-btn" {{ $ro }}>Add Item</button>
         <table class="table table-bordered align-middle text-nowrap table-footer">
             <tbody>
+                <tr>
+                    <td style="width: 50%;">Total excluding Tax</td>
+                    <td class="d-flex justify-content-between">RM <span id="excluding_tax">0</span></td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;">Tax amount</td>
+                    <td class="d-flex justify-content-between">RM <span id="tax-amount">0</span></td>
+                </tr>
                 <tr>
                     <td style="width: 50%;">Sub Total</td>
                     <td class="d-flex justify-content-between">RM <span id="subtotal">0</span></td>

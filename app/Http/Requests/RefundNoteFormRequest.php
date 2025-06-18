@@ -30,6 +30,11 @@ class RefundNoteFormRequest extends FormRequest
             'items.*.unit_price' => 'nullable|numeric|min:0',
             'items.*.description' => 'nullable|string',
             'items.*.total' => 'nullable|numeric|min:0',
+            'items.*.excluding_tax' => 'nullable|numeric|min:0',
+            'items.*.tax_amount' => 'nullable|numeric|min:0',
+            'items.*.tax_type' => 'nullable|string',
+            'items.*.tax_code' => 'nullable|string',
+            'items.*.tax_rate' => 'nullable|numeric|min:0',
             'customer' => 'nullable|string',
             'invoice_no' => 'required|string',
             'invoice_date' => 'nullable|date',
@@ -67,6 +72,14 @@ class RefundNoteFormRequest extends FormRequest
             'items.*.total.numeric' => 'Item total must be a number',
             'items.*.total.min' => 'Item total cannot be negative',
             'tags.string' => 'Tags must be number',
+            'items.*.excluding_tax.numeric' => 'Excluding tax must be a number',
+            'items.*.excluding_tax.min' => 'Excluding tax cannot be negative',
+            'items.*.tax_amount.numeric' => 'Tax amount must be a number',
+            'items.*.tax_amount.min' => 'Tax amount cannot be negative',
+            'items.*.tax_type.string' => 'Tax type must be text',
+            'items.*.tax_code.string' => 'Tax code must be text',
+            'items.*.tax_rate.numeric' => 'Tax rate must be a number',
+            'items.*.tax_rate.min' => 'Tax rate cannot be negative',
         ];
     }
 }

@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\CreditNote;
 use App\Models\Selections;
 use App\Models\Invoices;
+use App\Models\Taxes;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -74,6 +75,8 @@ class CreditNoteController extends Controller
          // Get customer list
          $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
+         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
             ->where('status', '0')
@@ -81,7 +84,7 @@ class CreditNoteController extends Controller
 
         $ro = '';
 
-        return view('credit_notes.create', compact('credit_note', 'invoices', 'customers', 'reasons', 'ro'));
+        return view('credit_notes.create', compact('credit_note', 'invoices', 'customers', 'taxes', 'reasons', 'ro'));
     }
 
     public function store(CreditNoteFormRequest $request)
@@ -94,7 +97,17 @@ class CreditNoteController extends Controller
             $invoice = Invoices::where('invoice_no', $request->invoice_no)->first();
 
             // Calculate totals
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Create Credit Note
             $credit_note = CreditNote::create([
@@ -129,6 +142,11 @@ class CreditNoteController extends Controller
                         'total' => $item['total'],
                         'subtotal' => $subtotal,
                         'currency_code' => 'MYR',
+                        'tax_type' => $item['tax_type'] ?? null,
+                        'tax_code' => $item['tax_code'] ?? null,
+                        'tax_rate' => $item['tax_rate'] ?? 0,
+                        'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                        'tax_amount' => $item['tax_amount'] ?? 0,
                         'status' => '0',
                     ]);
                 }
@@ -176,6 +194,8 @@ class CreditNoteController extends Controller
          // Get customer list
          $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
             ->where('status', '0')
@@ -183,7 +203,7 @@ class CreditNoteController extends Controller
 
         $ro = '';
 
-        return view('credit_notes.edit', compact('credit_note', 'invoices', 'customers', 'reasons', 'ro', 'subtotal'));
+        return view('credit_notes.edit', compact('credit_note', 'invoices', 'customers', 'taxes', 'reasons', 'ro', 'subtotal'));
     }
 
     public function update(CreditNoteFormRequest $request, $id)
@@ -219,7 +239,17 @@ class CreditNoteController extends Controller
                 'status' => '0',
             ]);
 
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+            
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Get existing item IDs for tracking
             $existingIds = $credit_note->creditItems()
@@ -243,6 +273,12 @@ class CreditNoteController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
+                            'status' => '0',
                         ]);
                         $processedIds[] = $item['id'];
                     } else {
@@ -255,6 +291,11 @@ class CreditNoteController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                             'status' => '0',
                         ]);
                     }
@@ -320,13 +361,16 @@ class CreditNoteController extends Controller
 
             // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
+
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
         $states = Selections::select('id', 'selection_data')
             ->where('selection_type', 'state')
             ->where('status', '0')
             ->get();
         $ro = '';
 
-        return view('credit_notes.show', compact('credit_note', 'subtotal', 'reasons', 'customers', 'states', 'ro'));
+        return view('credit_notes.show', compact('credit_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'ro'));
     }
 
     public function destroy($id)

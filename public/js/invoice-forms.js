@@ -3,6 +3,71 @@
  */
 document.addEventListener('DOMContentLoaded', function() {
 
+    // Function to initialize Select2 for tax dropdowns
+    function initializeTaxSelect2(element) {
+        if ($.fn.select2) {
+            $(element).select2({
+                placeholder: "Select tax type",
+                allowClear: true,
+                width: '100%',
+                templateSelection: function(data) {
+                    if (!data.id) return data.text;
+                    
+                    // Get the tax code from the data attributes or from the global object
+                    let taxCode = $(data.element).data('tax-code');
+                    if (!taxCode && window.taxCodes && data.id) {
+                        taxCode = window.taxCodes[data.id];
+                    }
+                    
+                    // Return just the tax code for the selected item (without tax type)
+                    return taxCode || data.text;
+                }
+            });
+            
+            // Add change event handlers
+            $(element).on('select2:select select2:unselect select2:clear', function() {
+                const row = $(this).closest('.invoice-item-row')[0];
+                if (row) {
+                    // Update tax code hidden field
+                    const selectedOption = $(this).find('option:selected');
+                    const taxCode = selectedOption.data('tax-code') || '';
+                    const taxRate = selectedOption.data('tax-rate') || 0;
+                    const taxCodeInput = $(row).find('.item-tax-code');
+                    
+                    if (taxCodeInput.length) {
+                        taxCodeInput.val(taxCode);
+                    } else {
+                        // Create tax code field if it doesn't exist
+                        const taxCodeInput = document.createElement('input');
+                        taxCodeInput.type = 'hidden';
+                        taxCodeInput.name = this.name.replace('tax_type', 'tax_code');
+                        taxCodeInput.className = 'item-tax-code';
+                        taxCodeInput.value = taxCode;
+                        $(this).after(taxCodeInput);
+                    }
+                    
+                    // Update tax rate and calculate tax amount
+                    const amount = parseFloat($(row).find('.item-amount').val()) || 0;
+                    const taxAmount = amount * (taxRate / 100);
+                    
+                    // Update tax amount hidden field
+                    const taxAmountInput = $(row).find('.item-tax-amount');
+                    if (taxAmountInput.length) {
+                        taxAmountInput.val(taxAmount.toFixed(2));
+                    }
+                    
+                    // Update tax rate hidden field
+                    const taxRateInput = $(row).find('.item-tax-rate');
+                    if (taxRateInput.length) {
+                        taxRateInput.val(taxRate);
+                    }
+                    
+                    calculateTotals();
+                }
+            });
+        }
+    }
+
     // Initialize Select2
     if ($.fn.select2) {
         $('.customer-select-input').select2({
@@ -10,6 +75,30 @@ document.addEventListener('DOMContentLoaded', function() {
             allowClear: true,
             width: '100%'
         });
+        
+        // Initialize Select2 for all existing tax dropdowns
+        $('.item-tax').each(function() {
+            const taxSelect = $(this);
+            const savedTaxType = taxSelect.val();
+            
+            // Initialize Select2
+            initializeTaxSelect2(this);
+            
+            // If there's a saved tax type, make sure it's selected after initialization
+            if (savedTaxType) {
+                console.log("Found saved tax type:", savedTaxType);
+                
+                // Use setTimeout to ensure Select2 is fully initialized
+                setTimeout(() => {
+                    taxSelect.val(savedTaxType).trigger('change');
+                }, 200);
+            }
+        });
+        
+        // Ensure tax data is loaded
+        if (!window.taxRates || !window.taxCodes) {
+            fetchTaxData();
+        }
     }
     
     // Handle shipping fields toggle
@@ -45,6 +134,9 @@ document.addEventListener('DOMContentLoaded', function() {
             // For refund note form
             rowCount = document.querySelectorAll('#invoice-items-body .invoice-item-row').length;
         }
+        
+        // Update row numbers on page load to ensure consistency
+        updateRowNumbers();
     }
     
     // Calculate totals on page load
@@ -87,24 +179,37 @@ document.addEventListener('DOMContentLoaded', function() {
     if (addItemBtn) {
         addItemBtn.addEventListener('click', function() {
             const tbody = document.getElementById('invoice-items-body');
+            const currentRowCount = tbody.querySelectorAll('tr').length;
             const newRow = document.createElement('tr');
             newRow.className = 'invoice-item-row';
             
+            // If tax data isn't loaded yet, fetch it
+            if (!window.taxOptions) {
+                fetchTaxData();
+            }
+            
             newRow.innerHTML = `
-                <td class="text-center">${rowCount + 1}</td>
+                <td class="text-center">${currentRowCount + 1}</td>
                 <td>
-                    <input type="hidden" name="items[${rowCount}][id]" value="">
-                    <input type="number" name="items[${rowCount}][quantity]" class="form-control item-quantity" value="0" min="0">
+                    <input type="hidden" name="items[${currentRowCount}][id]" value="">
+                    <input type="number" name="items[${currentRowCount}][quantity]" class="form-control item-quantity" value="0" min="0">
                 </td>
                 <td>
-                    <input type="text" name="items[${rowCount}][description]" class="form-control" value="">
+                    <input type="text" name="items[${currentRowCount}][description]" class="form-control" value="">
                 </td>
                 <td>
-                    <input type="number" name="items[${rowCount}][unit_price]" class="form-control item-unit-price" value="0" min="0" step="0.01">
+                    <input type="number" name="items[${currentRowCount}][unit_price]" class="form-control item-unit-price" value="0" min="0" step="0.01">
                 </td>
                 <td>
-                    <input type="number" name="items[${rowCount}][amount]" class="form-control item-amount" value="0" readonly step="0.01">
-                    <input type="hidden" name="items[${rowCount}][total]" class="item-total" value="0">
+                    <input type="number" name="items[${currentRowCount}][amount]" class="form-control item-amount" value="0" readonly step="0.01">
+                    <input type="hidden" name="items[${currentRowCount}][total]" class="item-total" value="0">
+                </td>
+                <td>
+                    <select name="items[${currentRowCount}][tax_type]" class="form-control item-tax">
+                        <option value=""> {{ 'Choose :' }}</option>
+                        ${window.taxOptions || ''}
+                    </select>
+                    <input type="hidden" name="items[${currentRowCount}][tax_code]" class="item-tax-code" value="">
                 </td>
                 <td class="text-center">
                     <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
@@ -112,10 +217,15 @@ document.addEventListener('DOMContentLoaded', function() {
             `;
             
             tbody.appendChild(newRow);
-            rowCount++;
+            rowCount = currentRowCount + 1;
             
             // Add event listeners to the new row
             addEventListenersToRow(newRow);
+            
+            // Initialize Select2 for the new tax dropdown
+            if ($.fn.select2) {
+                initializeTaxSelect2($(newRow).find('.item-tax'));
+            }
         });
     }
     
@@ -139,14 +249,73 @@ document.addEventListener('DOMContentLoaded', function() {
         // Calculate amount when quantity or unit price changes
         const quantityInput = row.querySelector('.item-quantity');
         const unitPriceInput = row.querySelector('.item-unit-price');
+        const taxSelect = row.querySelector('.item-tax');
         
         if (quantityInput && unitPriceInput) {
             [quantityInput, unitPriceInput].forEach(input => {
                 input.addEventListener('input', function() {
-                    calculateRowAmount(row);
+                    // Calculate base amount
+                    const quantity = parseFloat(quantityInput.value) || 0;
+                    const unitPrice = parseFloat(unitPriceInput.value) || 0;
+                    const amount = quantity * unitPrice;
+                    
+                    // Update amount field
+                    const amountInput = row.querySelector('.item-amount');
+                    if (amountInput) {
+                        amountInput.value = amount.toFixed(2);
+                    }
+                    
+                    // Update excluding_tax field
+                    const excludingTaxInput = row.querySelector('input[name$="[excluding_tax]"]');
+                    if (excludingTaxInput) {
+                        excludingTaxInput.value = amount.toFixed(2);
+                    }
+                    
+                    // Calculate tax amount based on selected tax type
+                    let taxRate = 0;
+                    if (taxSelect) {
+                        const selectedOption = $(taxSelect).find('option:selected');
+                        if (selectedOption.length) {
+                            taxRate = parseFloat(selectedOption.data('tax-rate')) || 0;
+                        } else if (window.taxRates && taxSelect.value) {
+                            taxRate = parseFloat(window.taxRates[taxSelect.value]) || 0;
+                        }
+                    }
+                    
+                    // Update tax amount
+                    const taxAmount = amount * (taxRate / 100);
+                    const taxAmountInput = row.querySelector('input[name$="[tax_amount]"]');
+                    if (taxAmountInput) {
+                        taxAmountInput.value = taxAmount.toFixed(2);
+                    }
+                    
+                    // Update total
+                    const total = amount + taxAmount;
+                    const totalInput = row.querySelector('.item-total');
+                    if (totalInput) {
+                        totalInput.value = total.toFixed(2);
+                    }
+                    
                     calculateTotals();
                 });
             });
+        }
+        
+        // Calculate tax when tax type changes
+        if (taxSelect) {
+            // For regular change event
+            taxSelect.addEventListener('change', function() {
+                // This is now handled by the Select2 event handlers
+                calculateTotals();
+            });
+            
+            // For Select2 change event
+            if ($.fn.select2) {
+                $(taxSelect).on('select2:select', function() {
+                    // This is now handled by the Select2 event handlers in initializeTaxSelect2
+                    calculateTotals();
+                });
+            }
         }
     }
     
@@ -167,33 +336,74 @@ document.addEventListener('DOMContentLoaded', function() {
                     input.setAttribute('name', newName);
                 }
             });
+            
+            // Update select names with new indices
+            const selects = row.querySelectorAll('select');
+            selects.forEach(select => {
+                const name = select.getAttribute('name');
+                if (name) {
+                    const newName = name.replace(/items\[\d+\]/, `items[${index}]`);
+                    select.setAttribute('name', newName);
+                }
+            });
         });
-    }
-    
-    // Calculate amount for a row
-    function calculateRowAmount(row) {
-        const quantity = parseFloat(row.querySelector('.item-quantity').value) || 0;
-        const unitPrice = parseFloat(row.querySelector('.item-unit-price').value) || 0;
-        const amount = quantity * unitPrice;
         
-        const amountInput = row.querySelector('.item-amount');
-        const totalInput = row.querySelector('.item-total');
-        
-        if (amountInput) amountInput.value = amount.toFixed(2);
-        if (totalInput) totalInput.value = amount.toFixed(2);
+        // Update global row counter to match the current number of rows
+        rowCount = document.querySelectorAll('#invoice-items-body tr').length;
     }
     
     // Calculate totals
     function calculateTotals() {
         let subtotal = 0;
+        let excludingTaxTotal = 0;
+        let taxAmountTotal = 0;
         
-        document.querySelectorAll('.item-amount').forEach(input => {
-            subtotal += parseFloat(input.value) || 0;
+        document.querySelectorAll('.invoice-item-row').forEach(row => {
+            // Get amount and tax amount from inputs
+            const amount = parseFloat(row.querySelector('.item-amount').value) || 0;
+            const taxAmountInput = row.querySelector('.item-tax-amount');
+            let taxAmount = 0;
+            
+            // If we have a tax amount input, use its value
+            if (taxAmountInput) {
+                taxAmount = parseFloat(taxAmountInput.value) || 0;
+            } else {
+                // Otherwise calculate from tax rate
+                const taxSelect = row.querySelector('.item-tax');
+                let taxRate = 0;
+                
+                if (taxSelect) {
+                    // For regular select
+                    const selectedTaxType = taxSelect.value;
+                    
+                    // Find the tax rate from the global tax rates object
+                    if (window.taxRates && selectedTaxType && window.taxRates[selectedTaxType]) {
+                        taxRate = parseFloat(window.taxRates[selectedTaxType]) || 0;
+                    }
+                }
+                
+                // Calculate tax amount
+                taxAmount = amount * (taxRate / 100);
+            }
+            
+            const total = amount + taxAmount;
+            
+            excludingTaxTotal += amount;
+            taxAmountTotal += taxAmount;
+            subtotal += total;
+            
+            // Update hidden fields with the latest calculations
+            const totalInput = row.querySelector('.item-total');
+            if (totalInput) totalInput.value = total.toFixed(2);
         });
         
+        const excludingTaxElement = document.getElementById('excluding_tax');
+        const taxAmountElement = document.getElementById('tax-amount');
         const subtotalElement = document.getElementById('subtotal');
         const totalElement = document.getElementById('total');
         
+        if (excludingTaxElement) excludingTaxElement.textContent = excludingTaxTotal.toFixed(2);
+        if (taxAmountElement) taxAmountElement.textContent = taxAmountTotal.toFixed(2);
         if (subtotalElement) subtotalElement.textContent = subtotal.toFixed(2);
         if (totalElement) totalElement.textContent = subtotal.toFixed(2);
     }
@@ -228,7 +438,7 @@ document.addEventListener('DOMContentLoaded', function() {
     let filteredInvoices = [];
     
     // Populate invoice selection table with pagination and search
-    function populateInvoiceSelectionTable(invoices) {
+    function populateInvoiceSelectionTable(data) {
         const tableBody = document.querySelector('#invoice-selection-table tbody');
         const searchInput = document.getElementById('invoice-search');
         const prevPageBtn = document.getElementById('prev-page');
@@ -238,9 +448,14 @@ document.addEventListener('DOMContentLoaded', function() {
         if (!tableBody) return;
         
         // Store all invoices globally
-        allInvoices = invoices || [];
+        allInvoices = data.invoices || data || [];
         filteredInvoices = [...allInvoices];
         currentPage = 1;
+        
+        // Initialize tax data if available
+        if (data.taxesData) {
+            initializeTaxData(data.taxesData);
+        }
         
         // Function to render the current page
         function renderCurrentPage() {
@@ -381,6 +596,14 @@ document.addEventListener('DOMContentLoaded', function() {
             .then(data => {
                 console.log('Received invoice data:', data); // Debug log
 
+                // Initialize tax data if available
+                if (data.taxesData) {
+                    initializeTaxData(data.taxesData);
+                } else {
+                    // If tax data is not included, fetch it
+                    fetchTaxData();
+                }
+
                 // Set invoice UUID from invoice_uuid
                 if (data.invoice_uuid) {
                     document.querySelector('input[name="invoice_uuid"]').value = data.invoice_uuid;
@@ -412,6 +635,16 @@ document.addEventListener('DOMContentLoaded', function() {
                             <td>
                                 <input type="number" name="items[${index}][amount]" class="form-control item-amount" value="${item.amount}" readonly step="0.01">
                                 <input type="hidden" name="items[${index}][total]" class="item-total" value="${item.total}">
+                                <input type="hidden" name="items[${index}][excluding_tax]" class="item-excluding_tax" value="${item['excluding_tax'] || item.amount}">
+                                <input type="hidden" name="items[${index}][tax_amount]" class="item-tax-amount" value="${item.tax_amount || 0}">
+                                <input type="hidden" name="items[${index}][tax_rate]" class="item-tax-rate" value="${item.tax_rate || 0}">
+                            </td>
+                            <td>
+                                <select name="items[${index}][tax_type]" class="form-control item-tax">
+                                    <option value=""> {{ 'Choose :' }}</option>
+                                    ${window.taxOptions || ''}
+                                </select>
+                                <input type="hidden" name="items[${index}][tax_code]" class="item-tax-code" value="${item.tax_code || ''}">
                             </td>
                             <td class="text-center">
                                 <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
@@ -423,6 +656,25 @@ document.addEventListener('DOMContentLoaded', function() {
                         
                         // Add event listeners to the new row
                         addEventListenersToRow(newRow);
+                        
+                        // Initialize Select2 for the tax dropdown
+                        if ($.fn.select2) {
+                            const taxSelect = $(newRow).find('.item-tax');
+                            const savedTaxType = item.tax_type;
+                            
+                            // Initialize Select2
+                            initializeTaxSelect2(taxSelect);
+                            
+                            // If there's a saved tax type, make sure it's selected after initialization
+                            if (savedTaxType) {
+                                console.log("Loading saved tax type:", savedTaxType);
+                                
+                                // Use setTimeout to ensure Select2 is fully initialized
+                                setTimeout(() => {
+                                    taxSelect.val(savedTaxType).trigger('change');
+                                }, 200);
+                            }
+                        }
                     });
                     
                     // Update customer information if available
@@ -444,6 +696,9 @@ document.addEventListener('DOMContentLoaded', function() {
                     if (data.billing_attention) document.querySelector('input[name="billing_attention"]').value = data.billing_attention;
                     if (data.shipping_attention) document.querySelector('input[name="shipping_attention"]').value = data.shipping_attention;
                     if (data.shipping_info) document.querySelector('input[name="shipping_info"]').value = data.shipping_info;
+                    
+                    // Update row numbers to ensure consistency
+                    updateRowNumbers();
                     
                     // Calculate totals
                     calculateTotals();
@@ -488,4 +743,89 @@ document.addEventListener('DOMContentLoaded', function() {
         // Scroll to error messages
         errorContainer.scrollIntoView({ behavior: 'smooth', block: 'start' });
     }
+
+    // Function to initialize tax data from the server
+    function initializeTaxData(taxData) {
+        if (!taxData) return;
+        
+        // Create global tax rates object
+        window.taxRates = {};
+        window.taxCodes = {};
+        window.taxOptions = '';
+        
+        // Process tax data
+        taxData.forEach(tax => {
+            window.taxRates[tax.tax_type] = tax.tax_rate;
+            window.taxCodes[tax.tax_type] = tax.tax_code;
+            
+            window.taxOptions += `
+                <option value="${tax.tax_type}" data-tax-code="${tax.tax_code}" data-tax-rate="${tax.tax_rate}">
+                    ${tax.tax_code} - ${tax.tax_type} (${tax.tax_rate}%)
+                </option>
+            `;
+        });
+    }
+    
+    // Fetch tax data from the server
+    function fetchTaxData() {
+        // Only fetch if tax data is not already loaded
+        if (!window.taxRates || !window.taxCodes) {
+            fetch('/invoices?format=json')
+                .then(response => response.json())
+                .then(data => {
+                    if (data.taxesData) {
+                        initializeTaxData(data.taxesData);
+                        
+                        // Re-initialize any existing tax dropdowns
+                        document.querySelectorAll('.item-tax').forEach(select => {
+                            // Save the current value
+                            const currentValue = select.value;
+                            
+                            // Update the options
+                            if (window.taxOptions) {
+                                // Clear existing options except the empty one
+                                while (select.options.length > 1) {
+                                    select.remove(1);
+                                }
+                                
+                                // Insert new options
+                                select.insertAdjacentHTML('beforeend', window.taxOptions);
+                            }
+                            
+                            // Restore the selected value
+                            if (currentValue) {
+                                select.value = currentValue;
+                            }
+                            
+                            // Re-initialize Select2 if it exists
+                            if ($.fn.select2 && $(select).data('select2')) {
+                                $(select).select2('destroy').select2({
+                                    placeholder: "Select tax type",
+                                    allowClear: true,
+                                    width: '100%',
+                                    templateSelection: function(data) {
+                                        if (!data.id) return data.text;
+                                        
+                                        // Get the tax code from the data attributes or from the global object
+                                        let taxCode = $(data.element).data('tax-code');
+                                        if (!taxCode && window.taxCodes && data.id) {
+                                            taxCode = window.taxCodes[data.id];
+                                        }
+                                        
+                                        // Return just the tax code for the selected item (without tax type)
+                                        return taxCode || data.text;
+                                    }
+                                });
+                            }
+                        });
+                    }
+                })
+                .catch(error => {
+                    console.error('Error fetching tax data:', error);
+                });
+        }
+    }
+    
+    // Fetch tax data on page load
+    fetchTaxData();
 }); 

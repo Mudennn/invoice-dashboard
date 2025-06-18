@@ -22,7 +22,8 @@
                 <tr>
                     <th class="text-center" style="width: 5%;">No</th>
                     <th class="text-center" style="width: 10%;">Quantity</th>
-                    <th style="width: 50%;">Description</th>
+                    <th style="width: 30%;">Description</th>
+                    <th style="width: 10%;">Tax Type</th>
                     <th style="width: 15%;" class="text-end">Unit Price</th>
                     <th style="width: 20%;" class="text-end">Amount</th>
                 </tr>
@@ -34,6 +35,7 @@
                             <td class="text-center">{{ $index + 1 }}</td>
                             <td class="text-center">{{ $item->quantity }}</td>
                             <td>{{ $item->description }}</td>
+                            <td>{{$item->tax_code}} - {{ $item->tax_type }}</td>
                             <td class="text-end">RM{{ number_format($item->unit_price, 2) }}</td>
                             <td class="text-end">RM{{ number_format($item->amount, 2) }}</td>
                         </tr>
@@ -46,12 +48,20 @@
             </tbody>
             <tfoot>
                 <tr>
-                    <td colspan="4" class="text-end"><strong>Subtotal</strong></td>
-                    <td class="text-end">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td colspan="5" class="text-end"><strong>Tax Excluded</strong></td>
+                    <td class="text-end">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('excluding_tax'), 2) : '0.00' }}</td>
                 </tr>
                 <tr>
-                    <td colspan="4" class="text-end"><strong>TOTAL</strong></td>
-                    <td class="text-end fw-bold">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('amount'), 2) : '0.00' }}</td>
+                    <td colspan="5" class="text-end"><strong>Tax Amount</strong></td>
+                    <td class="text-end">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('tax_amount'), 2) : '0.00' }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-end"><strong>Subtotal</strong></td>
+                    <td class="text-end">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('excluding_tax') + $refund_note->refundItems->sum('tax_amount'), 2) : '0.00' }}</td>
+                </tr>
+                <tr>
+                    <td colspan="5" class="text-end"><strong>TOTAL</strong></td>
+                    <td class="text-end fw-bold">RM{{ isset($refund_note->refundItems) ? number_format($refund_note->refundItems->sum('excluding_tax') + $refund_note->refundItems->sum('tax_amount'), 2) : '0.00' }}</td>
                 </tr>
             </tfoot>
         </table>

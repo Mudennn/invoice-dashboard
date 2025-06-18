@@ -9,6 +9,7 @@ use App\Http\Controllers\RefundNoteController;
 use App\Http\Controllers\CompanyProfileController;
 use App\Http\Controllers\ReceiptController;
 use App\Http\Controllers\SelfBilledInvoiceController;
+use App\Http\Controllers\TaxController;
 
 Route::get('/', function () {
     return view('dashboard.index');
@@ -109,3 +110,14 @@ Route::get('self_billed_invoices/get-details/{self_billed_invoice_no}', [SelfBil
 
 // Print Invoice
 Route::get('/self_billed_invoices/{id}/print', [SelfBilledInvoiceController::class, 'print'])->name('self_billed_invoices.print');
+
+
+// Tax Routes
+Route::get('taxes', [TaxController::class, 'index'])->name('taxes.index');
+Route::get('taxes/create', [TaxController::class, 'create'])->name('taxes.create');
+Route::post('taxes', [TaxController::class, 'store'])->name('taxes.store');
+Route::get('taxes/{id}/edit', [TaxController::class, 'edit'])->name('taxes.edit');
+Route::patch('taxes/{id}', [TaxController::class, 'update'])->name('taxes.update');
+Route::get('taxes/{id}', [TaxController::class, 'show'])->name('taxes.show');
+Route::delete('taxes/{id}', [TaxController::class, 'destroy'])->name('taxes.destroy');
+Route::get('taxes/{id}/view', [TaxController::class, 'view'])->name('taxes.view');

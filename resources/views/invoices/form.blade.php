@@ -13,7 +13,6 @@
     <div class="alert alert-danger" id="validation-errors" style="display: none;"></div>
 @endif
 
-
 {{-- Shipping Information --}}
 <div class="input-form form-input-container">
     <div class="d-flex flex-column gap-2 mb-4">
@@ -27,7 +26,8 @@
                 <div class="w-100">
                     <label for="customer" class="form-lable">Customer</label>
                     {{-- <input type="text" name="customer" class="form-control" value="{{ $invoice->customer }}" {{$ro}}> --}}
-                    <select name="customer" id="customer" class="form-control form-select customer-select-input" {{ $ro }}>
+                    <select name="customer" id="customer" class="form-control form-select customer-select-input"
+                        {{ $ro }}>
                         <option value=""> {{ 'Choose :' }}</option>
                         @foreach ($customers as $customer)
                             @if ($invoice->customer)
@@ -49,16 +49,16 @@
                     <div class="d-flex justify-content-between align-items-center mb-2">
                         <label for="shipping_info" class="form-lable">Shipping Info</label>
                         <div class="form-check">
-                            <input class="form-check-input" type="checkbox" id="enable-shipping" 
-                                {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? 'checked' : '' }}>
+                            <input class="form-check-input" type="checkbox" id="enable-shipping"
+                                {{ $invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address ? 'checked' : '' }}>
                             <label class="form-check-label" for="enable-shipping">
                                 Enable Shipping
                             </label>
                         </div>
                     </div>
                     <input type="text" name="shipping_info" id="shipping_info" class="form-control shipping-field"
-                        value="{{ $invoice->shipping_info }}" {{ $ro }} 
-                        {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? '' : 'disabled' }}>
+                        value="{{ $invoice->shipping_info }}" {{ $ro }}
+                        {{ $invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address ? '' : 'disabled' }}>
 
                     @error('shipping_info')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -77,9 +77,10 @@
                 </div>
                 <div class="w-100">
                     <label for="shipping_attention" class="form-lable">Shipping Attention</label>
-                    <input type="text" name="shipping_attention" id="shipping_attention" class="form-control shipping-field"
-                        value="{{ $invoice->shipping_attention }}" {{ $ro }}
-                        {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? '' : 'disabled' }}>
+                    <input type="text" name="shipping_attention" id="shipping_attention"
+                        class="form-control shipping-field" value="{{ $invoice->shipping_attention }}"
+                        {{ $ro }}
+                        {{ $invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address ? '' : 'disabled' }}>
 
                     @error('shipping_attention')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -98,7 +99,7 @@
                 <div class="w-100">
                     <label for="shipping_address" class="form-lable">Shipping Address</label>
                     <textarea name="shipping_address" id="shipping_address" class="form-control shipping-field" {{ $ro }}
-                        {{ ($invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address) ? '' : 'disabled' }}>{{ $invoice->shipping_address }}</textarea>
+                        {{ $invoice->shipping_info || $invoice->shipping_attention || $invoice->shipping_address ? '' : 'disabled' }}>{{ $invoice->shipping_address }}</textarea>
 
                     @error('shipping_address')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -123,8 +124,8 @@
             <div class="d-flex flex-column flex-md-row gap-4 w-100">
                 <div class="w-100">
                     <label for="invoice_no" class="form-lable">Invoice Number</label>
-                    <input type="text" name="invoice_no" class="form-control"
-                        value="{{$invoice->invoice_no }}" {{ $ro }}>
+                    <input type="text" name="invoice_no" class="form-control" value="{{ $invoice->invoice_no }}"
+                        {{ $ro }}>
 
                     @error('invoice_no')
                         <span class="text-danger font-weight-bold small"># {{ $message }}</span>
@@ -223,34 +224,58 @@
                     <th scope="col" style="width: 40%;">Description</th>
                     <th scope="col" style="width: 10%;">Unit Price</th>
                     <th scope="col" style="width: 10%;">Amount</th>
+                    <th scope="col" style="width: 10%;">Tax</th>
                     <th scope="col" style="width: 5%;"></th>
                 </tr>
             </thead>
             <tbody id="invoice-items-body">
-                @if(isset($invoice->invoiceItems) && count($invoice->invoiceItems) > 0)
-                    @foreach($invoice->invoiceItems as $index => $item)
-                    <tr class="invoice-item-row">
-                        <td class="text-center">{{ $index + 1 }}</td>
-                        <td>
-                            <input type="hidden" name="items[{{ $index }}][id]" value="{{ $item->id }}">
-                            <input type="number" name="items[{{ $index }}][quantity]" class="form-control item-quantity" value="{{ $item->quantity }}" min="0" {{ $ro }}>
-                        </td>
-                        <td>
-                            <input type="text" name="items[{{ $index }}][description]" class="form-control" value="{{ $item->description }}" {{ $ro }}>
-                        </td>
-                        <td>
-                            <input type="number" name="items[{{ $index }}][unit_price]" class="form-control item-unit-price" value="{{ $item->unit_price }}" min="0" step="0.01" {{ $ro }}>
-                        </td>
-                        <td>
-                            <input type="number" name="items[{{ $index }}][amount]" class="form-control item-amount" value="{{ $item->amount }}" readonly step="0.01" {{ $ro }}>
-                            <input type="hidden" name="items[{{ $index }}][total]" class="item-total" value="{{ $item->total }}">
-                        </td>
-                        <td class="text-center">
-                            <button type="button" class="delete-icon-button remove-item" {{ $ro }}>
-                                <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
-                            </button>
-                        </td>
-                    </tr>
+                @if (isset($invoice->invoiceItems) && count($invoice->invoiceItems) > 0)
+                    @foreach ($invoice->invoiceItems as $index => $item)
+                        <tr class="invoice-item-row">
+                            <td class="text-center">{{ $index + 1 }}</td>
+                            <td>
+                                <input type="hidden" name="items[{{ $index }}][id]"
+                                    value="{{ $item->id }}">
+                                <input type="number" name="items[{{ $index }}][quantity]"
+                                    class="form-control item-quantity" value="{{ $item->quantity }}" min="0"
+                                    {{ $ro }}>
+                            </td>
+                            <td>
+                                <input type="text" name="items[{{ $index }}][description]"
+                                    class="form-control" value="{{ $item->description }}" {{ $ro }}>
+                            </td>
+                            <td>
+                                <input type="number" name="items[{{ $index }}][unit_price]"
+                                    class="form-control item-unit-price" value="{{ $item->unit_price }}"
+                                    min="0" step="0.01" {{ $ro }}>
+                            </td>
+                            <td>
+                                <input type="number" name="items[{{ $index }}][amount]"
+                                    class="form-control item-amount" value="{{ $item->amount }}" readonly
+                                    step="0.01" {{ $ro }}>
+                                <input type="hidden" name="items[{{ $index }}][total]" class="item-total"
+                                    value="{{ $item->total }}">
+                            </td>
+                            <td>
+                                <select name="items[{{ $index }}][tax_type]" class="form-control item-tax"
+                                    {{ $ro }}>
+                                    <option value=""> {{ 'Choose :' }}</option>
+                                    @foreach ($taxes as $tax)
+                                        <option value="{{ $tax->tax_type }}"
+                                            data-tax-code="{{ $tax->tax_code }}" 
+                                            data-tax-rate="{{ $tax->tax_rate }}"
+                                            {{ $item->tax_type == $tax->tax_type ? 'selected' : '' }}>
+                                            {{ $tax->tax_code }} - {{ $tax->tax_type }} ({{ $tax->tax_rate }}%)</option>
+                                    @endforeach
+                                </select>
+                                <input type="hidden" name="items[{{ $index }}][tax_code]" class="item-tax-code" value="{{ $item->tax_code ?? '' }}">
+                            </td>
+                            <td class="text-center">
+                                <button type="button" class="delete-icon-button remove-item" {{ $ro }}>
+                                    <span class="material-symbols-outlined" style="font-size: 16px;">delete</span>
+                                </button>
+                            </td>
+                        </tr>
                     @endforeach
                 @endif
             </tbody>
@@ -262,6 +287,14 @@
         <button type="button" class="primary-button" id="add-item-btn" {{ $ro }}>Add Item</button>
         <table class="table table-bordered align-middle text-nowrap table-footer">
             <tbody>
+                <tr>
+                    <td style="width: 50%;">Total excluding Tax</td>
+                    <td class="d-flex justify-content-between">RM <span id="excluding_tax">0</span></td>
+                </tr>
+                <tr>
+                    <td style="width: 50%;">Tax amount</td>
+                    <td class="d-flex justify-content-between">RM <span id="tax-amount">0</span></td>
+                </tr>
                 <tr>
                     <td style="width: 50%;">Sub Total</td>
                     <td class="d-flex justify-content-between">RM <span id="subtotal">0</span></td>
@@ -286,7 +319,7 @@
 
     <div class="btn-group col-12 col-md-5 col-lg-3" role="group" aria-label="Basic radio toggle button group">
         <input type="radio" class="btn-check" name="control" id="btnradio1" value="1" autocomplete="off"
-            {{$invoice->control == '1' || $invoice->control == 'draft' ? 'checked' : '' }} checked>
+            {{ $invoice->control == '1' || $invoice->control == 'draft' ? 'checked' : '' }} checked>
         <label class="btn btn-outline-primary" for="btnradio1">Draft</label>
 
         <input type="radio" class="btn-check" name="control" id="btnradio2" value="2" autocomplete="off"
@@ -300,4 +333,3 @@
 </div>
 
 <script src="{{ asset('js/invoice-forms.js') }}"></script>
-    

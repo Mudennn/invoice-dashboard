@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\RefundNote;
 use App\Models\Selections;
 use App\Models\Invoices;
+use App\Models\Taxes;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -74,6 +75,8 @@ class RefundNoteController extends Controller
          // Get customer list
          $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
             ->where('status', '0')
@@ -81,7 +84,7 @@ class RefundNoteController extends Controller
 
         $ro = '';
 
-        return view('refund_notes.create', compact('refund_note', 'invoices', 'customers', 'reasons', 'ro'));
+        return view('refund_notes.create', compact('refund_note', 'invoices', 'customers', 'reasons', 'taxes', 'ro'));
     }
 
     public function store(RefundNoteFormRequest $request)
@@ -94,7 +97,17 @@ class RefundNoteController extends Controller
             $invoice = Invoices::where('invoice_no', $request->invoice_no)->first();
 
             // Calculate totals
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Create Refund Note
             $refund_note = RefundNote::create([
@@ -129,6 +142,11 @@ class RefundNoteController extends Controller
                         'total' => $item['total'],
                         'subtotal' => $subtotal,
                         'currency_code' => 'MYR',
+                        'tax_type' => $item['tax_type'] ?? null,
+                        'tax_code' => $item['tax_code'] ?? null,
+                        'tax_rate' => $item['tax_rate'] ?? 0,
+                        'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                        'tax_amount' => $item['tax_amount'] ?? 0,
                         'status' => '0',
                     ]);
                 }
@@ -176,6 +194,8 @@ class RefundNoteController extends Controller
          // Get customer list
          $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'refund_reason')
             ->where('status', '0')
@@ -183,7 +203,7 @@ class RefundNoteController extends Controller
 
         $ro = '';
 
-        return view('refund_notes.edit', compact('refund_note', 'invoices', 'customers', 'reasons', 'ro', 'subtotal'));
+        return view('refund_notes.edit', compact('refund_note', 'invoices', 'customers', 'reasons', 'taxes', 'ro', 'subtotal'));
     }
 
     public function update(RefundNoteFormRequest $request, $id)
@@ -196,6 +216,18 @@ class RefundNoteController extends Controller
 
             // Fetch the invoice from the selected invoice
             $invoice = Invoices::where('invoice_no', $request->invoice_no)->first();
+
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Update Refund Note
             $refund_note->update([
@@ -219,8 +251,6 @@ class RefundNoteController extends Controller
                 'status' => '0',
             ]);
 
-            $subtotal = collect($request->items)->sum('total');
-
             // Get existing item IDs for tracking
             $existingIds = $refund_note->refundItems()
                 ->where('status', '0')
@@ -243,6 +273,11 @@ class RefundNoteController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                         ]);
                         $processedIds[] = $item['id'];
                     } else {
@@ -255,6 +290,11 @@ class RefundNoteController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                             'status' => '0',
                         ]);
                     }
@@ -320,13 +360,16 @@ class RefundNoteController extends Controller
 
             // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
+
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
         $states = Selections::select('id', 'selection_data')
             ->where('selection_type', 'state')
             ->where('status', '0')
             ->get();
         $ro = '';
 
-        return view('refund_notes.show', compact('refund_note', 'subtotal', 'reasons', 'customers', 'states', 'ro'));
+        return view('refund_notes.show', compact('refund_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'ro'));
     }
 
     public function destroy($id)
