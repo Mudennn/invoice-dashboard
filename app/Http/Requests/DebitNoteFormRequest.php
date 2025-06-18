@@ -25,7 +25,7 @@ class DebitNoteFormRequest extends FormRequest
             'debit_note_no' => 'required|string',
             'invoice_uuid' => 'required|uuid',
             'items' => 'nullable|array',
-            'items.*.id' => 'nullable|exists:invoice_items,id',
+            'items.*.id' => 'nullable|exists:debit_note_items,id',
             'items.*.quantity' => 'nullable|numeric|min:0',
             'items.*.unit_price' => 'nullable|numeric|min:0',
             'items.*.description' => 'nullable|string',
@@ -35,6 +35,7 @@ class DebitNoteFormRequest extends FormRequest
             'items.*.tax_type' => 'nullable|string',
             'items.*.tax_code' => 'nullable|string',
             'items.*.tax_rate' => 'nullable|numeric|min:0',
+            'items.*.classification_code' => 'nullable|string',
             'customer' => 'nullable|string',
             'invoice_no' => 'required|string',
             'invoice_date' => 'nullable|date',
@@ -79,6 +80,7 @@ class DebitNoteFormRequest extends FormRequest
             'items.*.tax_code.string' => 'Tax code must be text',
             'items.*.tax_rate.numeric' => 'Tax rate must be a number',
             'items.*.tax_rate.min' => 'Tax rate cannot be negative',
+            'items.*.classification_code.string' => 'Classification code must be text',
             'tags.string' => 'Tags must be number',
         ];
     }

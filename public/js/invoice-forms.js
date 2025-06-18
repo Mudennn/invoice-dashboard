@@ -68,6 +68,26 @@ document.addEventListener('DOMContentLoaded', function() {
         }
     }
 
+    // Function to initialize Select2 for classification dropdowns
+    function initializeClassificationSelect2(element) {
+        if ($.fn.select2) {
+            $(element).select2({
+                placeholder: "Select classification",
+                allowClear: true,
+                width: '100%',
+                templateSelection: function(data) {
+                    if (!data.id) return data.text;
+                    
+                    // Get the classification code from the data attributes
+                    let classificationCode = data.id;
+                    
+                    // Return just the classification code for the selected item
+                    return classificationCode || data.text;
+                }
+            });
+        }
+    }
+
     // Initialize Select2
     if ($.fn.select2) {
         $('.customer-select-input').select2({
@@ -91,6 +111,25 @@ document.addEventListener('DOMContentLoaded', function() {
                 // Use setTimeout to ensure Select2 is fully initialized
                 setTimeout(() => {
                     taxSelect.val(savedTaxType).trigger('change');
+                }, 200);
+            }
+        });
+        
+        // Initialize Select2 for all existing classification dropdowns
+        $('.item-classification').each(function() {
+            const classificationSelect = $(this);
+            const savedClassification = classificationSelect.val();
+            
+            // Initialize Select2
+            initializeClassificationSelect2(this);
+            
+            // If there's a saved classification, make sure it's selected after initialization
+            if (savedClassification) {
+                console.log("Found saved classification:", savedClassification);
+                
+                // Use setTimeout to ensure Select2 is fully initialized
+                setTimeout(() => {
+                    classificationSelect.val(savedClassification).trigger('change');
                 }, 200);
             }
         });
@@ -205,11 +244,19 @@ document.addEventListener('DOMContentLoaded', function() {
                     <input type="hidden" name="items[${currentRowCount}][total]" class="item-total" value="0">
                 </td>
                 <td>
+                    <select name="items[${currentRowCount}][classification_code]" class="form-control item-classification">
+                        <option value=""> {{ 'Choose :' }}</option>
+                        ${window.classificationOptions || ''}
+                    </select>
+                </td>
+                <td>
                     <select name="items[${currentRowCount}][tax_type]" class="form-control item-tax">
                         <option value=""> {{ 'Choose :' }}</option>
                         ${window.taxOptions || ''}
                     </select>
                     <input type="hidden" name="items[${currentRowCount}][tax_code]" class="item-tax-code" value="">
+                    <input type="hidden" name="items[${currentRowCount}][tax_rate]" class="item-tax-rate" value="0">
+                    <input type="hidden" name="items[${currentRowCount}][tax_amount]" class="item-tax-amount" value="0">
                 </td>
                 <td class="text-center">
                     <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
@@ -225,6 +272,7 @@ document.addEventListener('DOMContentLoaded', function() {
             // Initialize Select2 for the new tax dropdown
             if ($.fn.select2) {
                 initializeTaxSelect2($(newRow).find('.item-tax'));
+                initializeClassificationSelect2($(newRow).find('.item-classification'));
             }
         });
     }
@@ -603,6 +651,11 @@ document.addEventListener('DOMContentLoaded', function() {
                     // If tax data is not included, fetch it
                     fetchTaxData();
                 }
+                
+                // Initialize classification data if available
+                if (data.classificationsData) {
+                    initializeClassificationData(data.classificationsData);
+                }
 
                 // Set invoice UUID from invoice_uuid
                 if (data.invoice_uuid) {
@@ -636,8 +689,12 @@ document.addEventListener('DOMContentLoaded', function() {
                                 <input type="number" name="items[${index}][amount]" class="form-control item-amount" value="${item.amount}" readonly step="0.01">
                                 <input type="hidden" name="items[${index}][total]" class="item-total" value="${item.total}">
                                 <input type="hidden" name="items[${index}][excluding_tax]" class="item-excluding_tax" value="${item['excluding_tax'] || item.amount}">
-                                <input type="hidden" name="items[${index}][tax_amount]" class="item-tax-amount" value="${item.tax_amount || 0}">
-                                <input type="hidden" name="items[${index}][tax_rate]" class="item-tax-rate" value="${item.tax_rate || 0}">
+                            </td>
+                            <td>
+                                <select name="items[${index}][classification_code]" class="form-control item-classification">
+                                    <option value=""> {{ 'Choose :' }}</option>
+                                    ${window.classificationOptions || ''}
+                                </select>
                             </td>
                             <td>
                                 <select name="items[${index}][tax_type]" class="form-control item-tax">
@@ -645,6 +702,8 @@ document.addEventListener('DOMContentLoaded', function() {
                                     ${window.taxOptions || ''}
                                 </select>
                                 <input type="hidden" name="items[${index}][tax_code]" class="item-tax-code" value="${item.tax_code || ''}">
+                                <input type="hidden" name="items[${index}][tax_rate]" class="item-tax-rate" value="${item.tax_rate || 0}">
+                                <input type="hidden" name="items[${index}][tax_amount]" class="item-tax-amount" value="${item.tax_amount || 0}">
                             </td>
                             <td class="text-center">
                                 <button type="button" class="delete-icon-button remove-item"><span class="material-symbols-outlined" style="font-size: 16px;">delete</span></button>
@@ -672,6 +731,23 @@ document.addEventListener('DOMContentLoaded', function() {
                                 // Use setTimeout to ensure Select2 is fully initialized
                                 setTimeout(() => {
                                     taxSelect.val(savedTaxType).trigger('change');
+                                }, 200);
+                            }
+                            
+                            // Initialize Select2 for the classification dropdown
+                            const classificationSelect = $(newRow).find('.item-classification');
+                            const savedClassification = item.classification_code;
+                            
+                            // Initialize Select2
+                            initializeClassificationSelect2(classificationSelect);
+                            
+                            // If there's a saved classification, make sure it's selected after initialization
+                            if (savedClassification) {
+                                console.log("Loading saved classification:", savedClassification);
+                                
+                                // Use setTimeout to ensure Select2 is fully initialized
+                                setTimeout(() => {
+                                    classificationSelect.val(savedClassification).trigger('change');
                                 }, 200);
                             }
                         }
@@ -766,6 +842,22 @@ document.addEventListener('DOMContentLoaded', function() {
         });
     }
     
+    // Function to initialize classification data from the server
+    function initializeClassificationData(classificationData) {
+        if (!classificationData) return;
+        
+        window.classificationOptions = '';
+        
+        // Process classification data
+        classificationData.forEach(classification => {
+            window.classificationOptions += `
+                <option value="${classification.classification_code}">
+                    ${classification.classification_code} - ${classification.description}
+                </option>
+            `;
+        });
+    }
+
     // Fetch tax data from the server
     function fetchTaxData() {
         // Only fetch if tax data is not already loaded
@@ -819,9 +911,50 @@ document.addEventListener('DOMContentLoaded', function() {
                             }
                         });
                     }
+                    
+                    if (data.classificationsData) {
+                        initializeClassificationData(data.classificationsData);
+                        
+                        // Re-initialize any existing classification dropdowns
+                        document.querySelectorAll('.item-classification').forEach(select => {
+                            // Save the current value
+                            const currentValue = select.value;
+                            
+                            // Update the options
+                            if (window.classificationOptions) {
+                                // Clear existing options except the empty one
+                                while (select.options.length > 1) {
+                                    select.remove(1);
+                                }
+                                
+                                // Insert new options
+                                select.insertAdjacentHTML('beforeend', window.classificationOptions);
+                            }
+                            
+                            // Restore the selected value
+                            if (currentValue) {
+                                select.value = currentValue;
+                            }
+                            
+                            // Re-initialize Select2 if it exists
+                            if ($.fn.select2 && $(select).data('select2')) {
+                                $(select).select2('destroy').select2({
+                                    placeholder: "Select classification",
+                                    allowClear: true,
+                                    width: '100%',
+                                    templateSelection: function(data) {
+                                        if (!data.id) return data.text;
+                                        
+                                        // Return just the classification code for the selected item
+                                        return data.id || data.text;
+                                    }
+                                });
+                            }
+                        });
+                    }
                 })
                 .catch(error => {
-                    console.error('Error fetching tax data:', error);
+                    console.error('Error fetching data:', error);
                 });
         }
     }

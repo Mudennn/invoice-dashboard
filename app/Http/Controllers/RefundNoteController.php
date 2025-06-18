@@ -12,6 +12,7 @@ use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use App\Http\Requests\RefundNoteFormRequest;
 use App\Models\Customer;
+use App\Models\Classification;
 
 class RefundNoteController extends Controller
 {
@@ -77,6 +78,9 @@ class RefundNoteController extends Controller
 
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
             ->where('status', '0')
@@ -84,7 +88,7 @@ class RefundNoteController extends Controller
 
         $ro = '';
 
-        return view('refund_notes.create', compact('refund_note', 'invoices', 'customers', 'reasons', 'taxes', 'ro'));
+        return view('refund_notes.create', compact('refund_note', 'invoices', 'customers', 'reasons', 'taxes', 'classifications', 'ro'));
     }
 
     public function store(RefundNoteFormRequest $request)
@@ -147,6 +151,7 @@ class RefundNoteController extends Controller
                         'tax_rate' => $item['tax_rate'] ?? 0,
                         'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
                         'tax_amount' => $item['tax_amount'] ?? 0,
+                        'classification_code' => $item['classification_code'] ?? null,
                         'status' => '0',
                     ]);
                 }
@@ -196,6 +201,9 @@ class RefundNoteController extends Controller
 
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'refund_reason')
             ->where('status', '0')
@@ -203,7 +211,7 @@ class RefundNoteController extends Controller
 
         $ro = '';
 
-        return view('refund_notes.edit', compact('refund_note', 'invoices', 'customers', 'reasons', 'taxes', 'ro', 'subtotal'));
+        return view('refund_notes.edit', compact('refund_note', 'invoices', 'customers', 'reasons', 'taxes', 'classifications', 'ro', 'subtotal'));
     }
 
     public function update(RefundNoteFormRequest $request, $id)
@@ -265,7 +273,7 @@ class RefundNoteController extends Controller
 
                     if (!empty($item['id'])) {
                         // Update existing item
-                        $invoice->invoiceItems()->where('id', $item['id'])->where('status', '0')->update([
+                        $refund_note->refundItems()->where('id', $item['id'])->where('status', '0')->update([
                             'quantity' => $item['quantity'],
                             'description' => $item['description'],
                             'unit_price' => $item['unit_price'],
@@ -278,11 +286,12 @@ class RefundNoteController extends Controller
                             'tax_rate' => $item['tax_rate'] ?? 0,
                             'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
                             'tax_amount' => $item['tax_amount'] ?? 0,
+                            'classification_code' => $item['classification_code'] ?? null,
                         ]);
                         $processedIds[] = $item['id'];
                     } else {
                         // Only create if it's truly a new item
-                        $invoice->invoiceItems()->create([
+                        $refund_note->refundItems()->create([
                             'quantity' => $item['quantity'],
                             'description' => $item['description'],
                             'unit_price' => $item['unit_price'],
@@ -295,6 +304,7 @@ class RefundNoteController extends Controller
                             'tax_rate' => $item['tax_rate'] ?? 0,
                             'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
                             'tax_amount' => $item['tax_amount'] ?? 0,
+                            'classification_code' => $item['classification_code'] ?? null,
                             'status' => '0',
                         ]);
                     }
@@ -303,16 +313,7 @@ class RefundNoteController extends Controller
             // Soft delete any items that were removed from the form
             $removeIds = array_diff($existingIds, $processedIds);
             if (!empty($removeIds)) {
-                $invoice->invoiceItems()->whereIn('id', $removeIds)->delete();
-            }
-
-
-            // Delete any items that were removed from the form
-            $removedIds = array_diff($existingIds, $processedIds);
-            if (!empty($removedIds)) {
-                $refund_note->refundItems()
-                    ->whereIn('id', $removedIds)
-                    ->delete();
+                $refund_note->refundItems()->whereIn('id', $removeIds)->delete();
             }
 
             DB::commit();
@@ -353,6 +354,9 @@ class RefundNoteController extends Controller
 
         $subtotal = $refund_note->refundItems->first()->subtotal ?? 0;
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
             ->where('status', '0')
@@ -369,7 +373,7 @@ class RefundNoteController extends Controller
             ->get();
         $ro = '';
 
-        return view('refund_notes.show', compact('refund_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'ro'));
+        return view('refund_notes.show', compact('refund_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'classifications', 'ro'));
     }
 
     public function destroy($id)

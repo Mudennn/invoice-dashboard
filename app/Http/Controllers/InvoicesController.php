@@ -10,6 +10,7 @@ use Illuminate\Support\Str;
 use App\Models\Customer;
 use App\Models\Selections;
 use App\Models\Taxes;
+use App\Models\Classification;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 
@@ -34,10 +35,14 @@ class InvoicesController extends Controller
             
             // Get tax list for the response
             $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+            // Get classification list
+            $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
             
             return response()->json([
                 'invoices' => $invoices,
-                'taxesData' => $taxes
+                'taxesData' => $taxes,
+                'classificationsData' => $classifications
             ]);
         }
         
@@ -69,9 +74,13 @@ class InvoicesController extends Controller
 
         // Get tax list
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $ro = '';
 
-        return view('invoices.create', compact('invoice', 'customers', 'taxes', 'ro'));
+        return view('invoices.create', compact('invoice', 'customers', 'taxes', 'classifications', 'ro'));
     }
 
     public function store(InvoiceFormRequest $request)
@@ -131,6 +140,7 @@ class InvoicesController extends Controller
                         'total' => $item['total'],
                         'subtotal' => $subtotal,
                         'currency_code' => 'MYR',
+                        'classification_code' => $item['classification_code'] ?? null,
                         'tax_type' => $item['tax_type'] ?? null,
                         'tax_code' => $item['tax_code'] ?? null,
                         'tax_rate' => $item['tax_rate'] ?? 0,
@@ -182,9 +192,13 @@ class InvoicesController extends Controller
 
         // Get tax list
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $ro = '';
 
-        return view('invoices.edit', compact('invoice', 'customers', 'states', 'taxes', 'ro'));
+        return view('invoices.edit', compact('invoice', 'customers', 'states', 'taxes', 'classifications', 'ro'));
     }
 
     public function update(InvoiceFormRequest $request, $id)
@@ -251,6 +265,7 @@ class InvoicesController extends Controller
                             'amount' => $item['amount'],
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
+                            'classification_code' => $item['classification_code'] ?? null,
                             'tax_type' => $item['tax_type'] ?? null,
                             'tax_code' => $item['tax_code'] ?? null,
                             'tax_rate' => $item['tax_rate'] ?? 0,
@@ -269,6 +284,7 @@ class InvoicesController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'classification_code' => $item['classification_code'] ?? null,
                             'tax_type' => $item['tax_type'] ?? null,
                             'tax_code' => $item['tax_code'] ?? null,
                             'tax_rate' => $item['tax_rate'] ?? 0,
@@ -326,9 +342,13 @@ class InvoicesController extends Controller
 
         // Get tax list
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $ro = '';
 
-        return view('invoices.show', compact('invoice', 'customers', 'states', 'taxes', 'ro'));
+        return view('invoices.show', compact('invoice', 'customers', 'states', 'taxes', 'classifications', 'ro'));
     }
 
     public function view($id)
@@ -377,6 +397,9 @@ class InvoicesController extends Controller
             // Get tax list for the response
             $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
             
+            // Get classification list for the response
+            $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+            
             // Format the response with items
             $response = [
                 'invoice_no' => $invoice->invoice_no,
@@ -390,6 +413,7 @@ class InvoicesController extends Controller
                 'shipping_info' => $invoice->shipping_info,
                 'reference_number' => $invoice->reference_number,
                 'taxesData' => $taxes,
+                'classificationsData' => $classifications,
                 'items' => []
             ];
             
@@ -401,6 +425,7 @@ class InvoicesController extends Controller
                     'unit_price' => $item->unit_price,
                     'amount' => $item->amount,
                     'total' => $item->total,
+                    'classification_code' => $item->classification_code,
                     'tax_type' => $item->tax_type,
                     'tax_code' => $item->tax_code,
                     'tax_rate' => $item->tax_rate,

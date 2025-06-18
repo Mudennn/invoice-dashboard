@@ -11,6 +11,8 @@ use App\Models\Customer;
 use App\Models\Selections;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
+use App\Models\Taxes;
+use App\Models\Classification;
 
 class SelfBilledInvoiceController extends Controller
 {
@@ -22,18 +24,28 @@ class SelfBilledInvoiceController extends Controller
     public function index()
     {
         $self_billed_invoices = SelfBilledInvoice::select('self_billed_invoices.*')->where('self_billed_invoices.status', '0')->orderBy('self_billed_invoices.created_at', 'desc')->get();
-        
+
         // FOR API fetch invoice for each credit note, debit note, refund note
         // Return JSON response if requested
         if (request()->wantsJson() || request()->has('format') && request()->format === 'json') {
             // Calculate subtotal for each invoice from its items
-            $self_billed_invoices->each(function($self_billed_invoice) {
+            $self_billed_invoices->each(function ($self_billed_invoice) {
                 $self_billed_invoice->subtotal = $self_billed_invoice->selfBilledInvoiceItems->sum('total');
             });
-            
-            return response()->json($self_billed_invoices);
+
+            // Get tax list for the response
+            $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+            // Get classification list
+            $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
+            return response()->json([
+                'invoices' => $self_billed_invoices,
+                'taxesData' => $taxes,
+                'classificationsData' => $classifications
+            ]);
         }
-        
+
         return view('self_billed_invoices.index', compact('self_billed_invoices'));
     }
 
@@ -45,7 +57,7 @@ class SelfBilledInvoiceController extends Controller
         //Increment the number
         $number++;
 
-        return 'INV' . str_pad((string) $number, 4, '0', STR_PAD_LEFT);
+        return 'SBI' . str_pad((string) $number, 4, '0', STR_PAD_LEFT);
     }
 
     public function create()
@@ -54,15 +66,21 @@ class SelfBilledInvoiceController extends Controller
 
         // Generate next Invoice Number
         $lastInvoice = SelfBilledInvoice::orderBy('self_billed_invoice_no', 'desc')->first();
-        $nextInvoiceNo = $lastInvoice ? $this->generateNextInvoiceNo($lastInvoice->self_billed_invoice_no) : 'INV0001';
+        $nextInvoiceNo = $lastInvoice ? $this->generateNextInvoiceNo($lastInvoice->self_billed_invoice_no) : 'SBI0001';
         $self_billed_invoice->self_billed_invoice_no = $nextInvoiceNo;
 
         // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
+        // Get tax list
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $ro = '';
 
-        return view('self_billed_invoices.create', compact('self_billed_invoice', 'customers', 'ro'));
+        return view('self_billed_invoices.create', compact('self_billed_invoice', 'customers', 'ro', 'taxes', 'classifications'));
     }
 
     public function store(SelfBilledInvoiceFormRequest $request)
@@ -76,7 +94,18 @@ class SelfBilledInvoiceController extends Controller
             $self_billed_invoice_uuid = $request->self_billed_invoice_uuid ?? Str::uuid()->toString();
 
             // Calculate total amount
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
+
 
             // Create Invoice
             $self_billed_invoice = SelfBilledInvoice::create([
@@ -112,6 +141,12 @@ class SelfBilledInvoiceController extends Controller
                         'total' => $item['total'],
                         'subtotal' => $subtotal,
                         'currency_code' => 'MYR',
+                        'classification_code' => $item['classification_code'] ?? null,
+                        'tax_type' => $item['tax_type'] ?? null,
+                        'tax_code' => $item['tax_code'] ?? null,
+                        'tax_rate' => $item['tax_rate'] ?? 0,
+                        'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                        'tax_amount' => $item['tax_amount'] ?? 0,
                         'status' => '0',
                     ]);
                 }
@@ -151,13 +186,21 @@ class SelfBilledInvoiceController extends Controller
 
         // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
+
         $states = Selections::select('id', 'selection_data')
             ->where('selection_type', 'state')
             ->where('status', '0')
             ->get();
+
+        // Get tax list
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $ro = '';
 
-        return view('self_billed_invoices.edit', compact('self_billed_invoice', 'customers', 'states', 'ro'));
+        return view('self_billed_invoices.edit', compact('self_billed_invoice', 'customers', 'states', 'ro', 'taxes', 'classifications'));
     }
 
     public function update(SelfBilledInvoiceFormRequest $request, $id)
@@ -172,7 +215,17 @@ class SelfBilledInvoiceController extends Controller
             $self_billed_invoice_uuid = $request->self_billed_invoice_uuid ?? Str::uuid()->toString();
 
             // Calculate total amount
-            $subtotal = collect($request->items)->sum('total');
+            $subtotal = 0;
+            $excludingTaxTotal = 0;
+            $taxAmountTotal = 0;
+
+            if ($request->has('items')) {
+                foreach ($request->items as $item) {
+                    $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
+                    $taxAmountTotal += floatval($item['tax_amount'] ?? 0);
+                }
+                $subtotal = $excludingTaxTotal + $taxAmountTotal;
+            }
 
             // Update Invoice
             $self_billed_invoice->update([
@@ -214,6 +267,12 @@ class SelfBilledInvoiceController extends Controller
                             'amount' => $item['amount'],
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
+                            'classification_code' => $item['classification_code'] ?? null,
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                             'currency_code' => 'MYR',
                         ]);
                         $processedIds[] = $item['id'];
@@ -227,6 +286,12 @@ class SelfBilledInvoiceController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'classification_code' => $item['classification_code'] ?? null,
+                            'tax_type' => $item['tax_type'] ?? null,
+                            'tax_code' => $item['tax_code'] ?? null,
+                            'tax_rate' => $item['tax_rate'] ?? 0,
+                            'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
+                            'tax_amount' => $item['tax_amount'] ?? 0,
                             'status' => '0',
                         ]);
                     }
@@ -272,13 +337,21 @@ class SelfBilledInvoiceController extends Controller
 
         // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
+
         $states = Selections::select('id', 'selection_data')
             ->where('selection_type', 'state')
             ->where('status', '0')
             ->get();
+
+        // Get tax list
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $ro = '';
 
-        return view('self_billed_invoices.show', compact('self_billed_invoice', 'customers', 'states', 'ro'));
+        return view('self_billed_invoices.show', compact('self_billed_invoice', 'customers', 'states', 'ro', 'taxes', 'classifications'));
     }
 
     public function view($id)
@@ -316,14 +389,20 @@ class SelfBilledInvoiceController extends Controller
             $self_billed_invoice = SelfBilledInvoice::with(['selfBilledInvoiceItems' => function ($query) {
                 $query->where('status', '0');
             }])->where('self_billed_invoice_no', $self_billed_invoice_no)->where('status', '0')->first();
-            
+
             if (!$self_billed_invoice) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Invoice not found'
                 ], 404);
             }
+
+            // Get tax list for the response
+            $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
             
+            // Get classification list for the response
+            $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
             // Format the response with items
             $response = [
                 'self_billed_invoice_no' => $self_billed_invoice->self_billed_invoice_no,
@@ -338,7 +417,7 @@ class SelfBilledInvoiceController extends Controller
                 'reference_number' => $self_billed_invoice->reference_number,
                 'items' => []
             ];
-            
+
             // Add items to the response
             foreach ($self_billed_invoice->selfBilledInvoiceItems as $item) {
                 $response['items'][] = [
@@ -346,12 +425,17 @@ class SelfBilledInvoiceController extends Controller
                     'description' => $item->description,
                     'unit_price' => $item->unit_price,
                     'amount' => $item->amount,
-                    'total' => $item->total
+                    'total' => $item->total,
+                    'classification_code' => $item->classification_code,
+                    'tax_type' => $item->tax_type,
+                    'tax_code' => $item->tax_code,
+                    'tax_rate' => $item->tax_rate,
+                    'excluding_tax' => $item->{'excluding_tax'},
+                    'tax_amount' => $item->tax_amount,
                 ];
             }
-            
+
             return response()->json($response);
-            
         } catch (\Exception $e) {
             return response()->json([
                 'success' => false,
@@ -360,20 +444,20 @@ class SelfBilledInvoiceController extends Controller
         }
     }
 
-     // Print Invoice
-     public function print($id)
-     {
+    // Print Invoice
+    public function print($id)
+    {
         $self_billed_invoice = SelfBilledInvoice::with(['selfBilledInvoiceItems' => function ($query) {
             $query->where('status', '0');
         }])->findOrFail($id);
-        
+
         // Get company profile with state information
         $ourCompany = DB::table('company_profiles')
             ->select('company_profiles.*', 'state.selection_data as s_state')
             ->leftJoin('selections as state', 'company_profiles.state', '=', 'state.id')
             ->where('company_profiles.status', '0')
             ->first();
-        
+
         // Get customer profile if available with state information
         $customerProfile = DB::table('customers')
             ->select('customers.*', 'state.selection_data as s_state')
@@ -381,7 +465,7 @@ class SelfBilledInvoiceController extends Controller
             ->where('customers.customer_name', $self_billed_invoice->customer)
             ->where('customers.status', '0')
             ->first();
- 
+
         return view('self_billed_invoices.print', compact('self_billed_invoice', 'ourCompany', 'customerProfile'));
-     }
+    }
 }

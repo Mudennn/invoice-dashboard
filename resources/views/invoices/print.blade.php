@@ -86,6 +86,7 @@
                                 <th style="width: 5%;" class="text-center">Quantity</th>
                                 <th style="width: 10%;">Description</th>
                                 <th style="width: 10%;">Tax Type</th>
+                                <th style="width: 10%;">Classification</th>
                                 <th style="width: 8%;" class="total-data">Unit Price</th>
                                 <th style="width: 12%;" class="total-data">Total</th>
                          
@@ -98,6 +99,7 @@
                                     <td class="text-center">{{ number_format($item->quantity) == 0 ? '-' : number_format($item->quantity) }} </td>
                                     <td>{{ $item->description }}</td>
                                     <td>{{$item->tax_code}} - {{ $item->tax_type }}</td>
+                                    <td>{{ $item->classification_code }} - {{ $item->classification->description }}</td>
                                     <td class="total-data">{{ number_format($item->unit_price, 2) == 0 ? '-' : 'RM ' . number_format($item->unit_price, 2) }}
                                     </td>
                                     <td class="total-data">RM{{ number_format($item->total, 2) }}</td>
@@ -107,19 +109,19 @@
                         @if ($pageNum === $totalPages - 1)
                             <tfoot class="totals-table">
                                 <tr>
-                                    <td colspan="5" class="text-end"><strong>Total excluding Tax</strong></td>
+                                    <td colspan="6" class="text-end"><strong>Total excluding Tax</strong></td>
                                     <td class="text-end">RM{{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('excluding_tax'), 2) : '0.00' }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5" class="text-end"><strong>Tax amount</strong></td>
+                                    <td colspan="6" class="text-end"><strong>Tax amount</strong></td>
                                     <td class="text-end">RM{{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('tax_amount'), 2) : '0.00' }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5" class="text-end"><strong>Subtotal</strong></td>
+                                    <td colspan="6" class="text-end"><strong>Subtotal</strong></td>
                                     <td class="text-end">RM{{ isset($invoice->invoiceItems) ? number_format($invoice->invoiceItems->sum('excluding_tax') + $invoice->invoiceItems->sum('tax_amount'), 2) : '0.00' }}</td>
                                 </tr>
                                 <tr>
-                                    <td colspan="5" class="text-end"><strong>TOTAL</strong></td>
+                                    <td colspan="6" class="text-end"><strong>TOTAL</strong></td>
                                     <td style="font-weight: bold !important;" class="total-data total">RM{{ number_format($item->subtotal, 2) }}
                                     </td>
                                     

@@ -224,6 +224,7 @@
                     <th scope="col" style="width: 40%;">Description</th>
                     <th scope="col" style="width: 10%;">Unit Price</th>
                     <th scope="col" style="width: 10%;">Amount</th>
+                    <th scope="col" style="width: 10%;">Classification</th>
                     <th scope="col" style="width: 10%;">Tax</th>
                     <th scope="col" style="width: 5%;"></th>
                 </tr>
@@ -257,18 +258,35 @@
                                     value="{{ $item->total }}">
                             </td>
                             <td>
+                                <select name="items[{{ $index }}][classification_code]"
+                                    class="form-control item-classification" {{ $ro }}>
+                                    <option value=""> {{ 'Choose :' }}</option>
+                                    @foreach ($classifications as $classification)
+                                        <option value="{{ $classification->classification_code }}"
+                                            {{ $item->classification_code == $classification->classification_code ? 'selected' : '' }}>
+                                            {{ $classification->classification_code }} -
+                                            {{ $classification->description }}</option>
+                                    @endforeach
+                                </select>
+                            </td>
+                            <td>
                                 <select name="items[{{ $index }}][tax_type]" class="form-control item-tax"
                                     {{ $ro }}>
                                     <option value=""> {{ 'Choose :' }}</option>
                                     @foreach ($taxes as $tax)
-                                        <option value="{{ $tax->tax_type }}"
-                                            data-tax-code="{{ $tax->tax_code }}" 
+                                        <option value="{{ $tax->tax_type }}" data-tax-code="{{ $tax->tax_code }}"
                                             data-tax-rate="{{ $tax->tax_rate }}"
                                             {{ $item->tax_type == $tax->tax_type ? 'selected' : '' }}>
-                                            {{ $tax->tax_code }} - {{ $tax->tax_type }} ({{ $tax->tax_rate }}%)</option>
+                                            {{ $tax->tax_code }} - {{ $tax->tax_type }} ({{ $tax->tax_rate }}%)
+                                        </option>
                                     @endforeach
                                 </select>
-                                <input type="hidden" name="items[{{ $index }}][tax_code]" class="item-tax-code" value="{{ $item->tax_code ?? '' }}">
+                                <input type="hidden" name="items[{{ $index }}][tax_code]"
+                                    class="item-tax-code" value="{{ $item->tax_code ?? '' }}">
+                                <input type="hidden" name="items[{{ $index }}][tax_rate]"
+                                    class="item-tax-rate" value="{{ $item->tax_rate ?? 0 }}">
+                                <input type="hidden" name="items[{{ $index }}][tax_amount]"
+                                    class="item-tax-amount" value="{{ $item->tax_amount ?? 0 }}">
                             </td>
                             <td class="text-center">
                                 <button type="button" class="delete-icon-button remove-item" {{ $ro }}>

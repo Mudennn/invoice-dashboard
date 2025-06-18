@@ -25,7 +25,7 @@ class CreditNoteFormRequest extends FormRequest
             'credit_note_no' => 'required|string',
             'invoice_uuid' => 'required|uuid',
             'items' => 'nullable|array',
-            'items.*.id' => 'nullable|exists:invoice_items,id',
+            'items.*.id' => 'nullable|exists:credit_note_items,id',
             'items.*.quantity' => 'nullable|numeric|min:0',
             'items.*.unit_price' => 'nullable|numeric|min:0',
             'items.*.description' => 'nullable|string',
@@ -35,6 +35,7 @@ class CreditNoteFormRequest extends FormRequest
             'items.*.tax_type' => 'nullable|string',
             'items.*.tax_code' => 'nullable|string',
             'items.*.tax_rate' => 'nullable|numeric|min:0',
+            'items.*.classification_code' => 'nullable|string',
             'customer' => 'nullable|string',
             'invoice_no' => 'required|string',
             'invoice_date' => 'nullable|date',
@@ -71,7 +72,6 @@ class CreditNoteFormRequest extends FormRequest
             'items.*.description.string' => 'Item description must be text',
             'items.*.total.numeric' => 'Item total must be a number',
             'items.*.total.min' => 'Item total cannot be negative',
-            'tags.string' => 'Tags must be number',
             'items.*.excluding_tax.numeric' => 'Excluding tax must be a number',
             'items.*.excluding_tax.min' => 'Excluding tax cannot be negative',
             'items.*.tax_amount.numeric' => 'Tax amount must be a number',
@@ -80,6 +80,8 @@ class CreditNoteFormRequest extends FormRequest
             'items.*.tax_code.string' => 'Tax code must be text',
             'items.*.tax_rate.numeric' => 'Tax rate must be a number',
             'items.*.tax_rate.min' => 'Tax rate cannot be negative',
+            'items.*.classification_code.string' => 'Classification code must be text',
+            'tags.string' => 'Tags must be number',
         ];
     }
 }

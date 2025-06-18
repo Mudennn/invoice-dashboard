@@ -6,6 +6,7 @@ use Illuminate\Http\Request;
 use App\Models\Selections;
 use App\Models\Invoices;
 use App\Models\Taxes;
+use App\Models\Classification;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -77,6 +78,9 @@ class DebitNoteController extends Controller
 
          $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'debit_reason')
             ->where('status', '0')
@@ -84,7 +88,7 @@ class DebitNoteController extends Controller
 
         $ro = '';
 
-        return view('debit_notes.create', compact('debit_note', 'invoices', 'customers', 'taxes', 'reasons', 'ro'));
+        return view('debit_notes.create', compact('debit_note', 'invoices', 'customers', 'taxes', 'classifications', 'reasons', 'ro'));
     }
 
     public function store(DebitNoteFormRequest $request)
@@ -142,6 +146,7 @@ class DebitNoteController extends Controller
                         'total' => $item['total'],
                         'subtotal' => $subtotal,
                         'currency_code' => 'MYR',
+                        'classification_code' => $item['classification_code'] ?? null,
                         'tax_type' => $item['tax_type'] ?? null,
                         'tax_code' => $item['tax_code'] ?? null,
                         'tax_rate' => $item['tax_rate'] ?? 0,
@@ -196,6 +201,9 @@ class DebitNoteController extends Controller
 
          $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'debit_reason')
             ->where('status', '0')
@@ -203,7 +211,7 @@ class DebitNoteController extends Controller
 
         $ro = '';
 
-        return view('debit_notes.edit', compact('debit_note', 'invoices', 'customers', 'taxes', 'reasons', 'ro', 'subtotal'));
+        return view('debit_notes.edit', compact('debit_note', 'invoices', 'customers', 'taxes', 'classifications', 'reasons', 'ro', 'subtotal'));
     }
 
     public function update(DebitNoteFormRequest $request, $id)
@@ -273,6 +281,7 @@ class DebitNoteController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'classification_code' => $item['classification_code'] ?? null,
                             'tax_type' => $item['tax_type'] ?? null,
                             'tax_code' => $item['tax_code'] ?? null,
                             'tax_rate' => $item['tax_rate'] ?? 0,
@@ -290,6 +299,7 @@ class DebitNoteController extends Controller
                             'total' => $item['total'],
                             'subtotal' => $subtotal,
                             'currency_code' => 'MYR',
+                            'classification_code' => $item['classification_code'] ?? null,
                             'tax_type' => $item['tax_type'] ?? null,
                             'tax_code' => $item['tax_code'] ?? null,
                             'tax_rate' => $item['tax_rate'] ?? 0,
@@ -304,15 +314,6 @@ class DebitNoteController extends Controller
             $removeIds = array_diff($existingIds, $processedIds);
             if (!empty($removeIds)) {
                 $debit_note->debitItems()->whereIn('id', $removeIds)->delete();
-            }
-
-
-            // Delete any items that were removed from the form
-            $removedIds = array_diff($existingIds, $processedIds);
-            if (!empty($removedIds)) {
-                $debit_note->debitItems()
-                    ->whereIn('id', $removedIds)
-                    ->delete();
             }
 
             DB::commit();
@@ -353,6 +354,9 @@ class DebitNoteController extends Controller
 
         $subtotal = $debit_note->debitItems->first()->subtotal ?? 0;
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'debit_reason')
             ->where('status', '0')
@@ -369,7 +373,7 @@ class DebitNoteController extends Controller
             ->get();
         $ro = '';
 
-        return view('debit_notes.show', compact('debit_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'ro'));
+        return view('debit_notes.show', compact('debit_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'classifications', 'ro'));
     }
 
     public function destroy($id)

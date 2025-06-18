@@ -7,6 +7,7 @@ use App\Models\CreditNote;
 use App\Models\Selections;
 use App\Models\Invoices;
 use App\Models\Taxes;
+use App\Models\Classification;
 use RealRashid\SweetAlert\Facades\Alert;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
@@ -72,10 +73,13 @@ class CreditNoteController extends Controller
 
         $invoices = Invoices::where('status', '0')->get();
 
-         // Get customer list
-         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
+        // Get customer list
+        $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
-         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+        $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
 
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
@@ -84,7 +88,7 @@ class CreditNoteController extends Controller
 
         $ro = '';
 
-        return view('credit_notes.create', compact('credit_note', 'invoices', 'customers', 'taxes', 'reasons', 'ro'));
+        return view('credit_notes.create', compact('credit_note', 'invoices', 'customers', 'taxes', 'classifications', 'reasons', 'ro'));
     }
 
     public function store(CreditNoteFormRequest $request)
@@ -147,6 +151,7 @@ class CreditNoteController extends Controller
                         'tax_rate' => $item['tax_rate'] ?? 0,
                         'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
                         'tax_amount' => $item['tax_amount'] ?? 0,
+                        'classification_code' => $item['classification_code'] ?? null,
                         'status' => '0',
                     ]);
                 }
@@ -191,10 +196,13 @@ class CreditNoteController extends Controller
         $subtotal = $credit_note->creditItems->first()->subtotal ?? 0;
         $invoices = Invoices::where('status', '0')->get();
 
-         // Get customer list
-         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
+        // Get customer list
+        $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
+
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
 
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
@@ -203,7 +211,7 @@ class CreditNoteController extends Controller
 
         $ro = '';
 
-        return view('credit_notes.edit', compact('credit_note', 'invoices', 'customers', 'taxes', 'reasons', 'ro', 'subtotal'));
+        return view('credit_notes.edit', compact('credit_note', 'invoices', 'customers', 'taxes', 'classifications', 'reasons', 'ro', 'subtotal'));
     }
 
     public function update(CreditNoteFormRequest $request, $id)
@@ -242,7 +250,7 @@ class CreditNoteController extends Controller
             $subtotal = 0;
             $excludingTaxTotal = 0;
             $taxAmountTotal = 0;
-            
+
             if ($request->has('items')) {
                 foreach ($request->items as $item) {
                     $excludingTaxTotal += floatval($item['excluding_tax'] ?? $item['amount']);
@@ -265,7 +273,7 @@ class CreditNoteController extends Controller
 
                     if (!empty($item['id'])) {
                         // Update existing item
-                        $invoice->invoiceItems()->where('id', $item['id'])->where('status', '0')->update([
+                        $credit_note->creditItems()->where('id', $item['id'])->where('status', '0')->update([
                             'quantity' => $item['quantity'],
                             'description' => $item['description'],
                             'unit_price' => $item['unit_price'],
@@ -278,12 +286,13 @@ class CreditNoteController extends Controller
                             'tax_rate' => $item['tax_rate'] ?? 0,
                             'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
                             'tax_amount' => $item['tax_amount'] ?? 0,
+                            'classification_code' => $item['classification_code'] ?? null,
                             'status' => '0',
                         ]);
                         $processedIds[] = $item['id'];
                     } else {
                         // Only create if it's truly a new item
-                        $invoice->invoiceItems()->create([
+                        $credit_note->creditItems()->create([
                             'quantity' => $item['quantity'],
                             'description' => $item['description'],
                             'unit_price' => $item['unit_price'],
@@ -296,6 +305,7 @@ class CreditNoteController extends Controller
                             'tax_rate' => $item['tax_rate'] ?? 0,
                             'excluding_tax' => $item['excluding_tax'] ?? $item['amount'],
                             'tax_amount' => $item['tax_amount'] ?? 0,
+                            'classification_code' => $item['classification_code'] ?? null,
                             'status' => '0',
                         ]);
                     }
@@ -304,16 +314,7 @@ class CreditNoteController extends Controller
             // Soft delete any items that were removed from the form
             $removeIds = array_diff($existingIds, $processedIds);
             if (!empty($removeIds)) {
-                $invoice->invoiceItems()->whereIn('id', $removeIds)->delete();
-            }
-
-
-            // Delete any items that were removed from the form
-            $removedIds = array_diff($existingIds, $processedIds);
-            if (!empty($removedIds)) {
-                $credit_note->creditItems()
-                    ->whereIn('id', $removedIds)
-                    ->delete();
+                $credit_note->creditItems()->whereIn('id', $removeIds)->delete();
             }
 
             DB::commit();
@@ -354,12 +355,15 @@ class CreditNoteController extends Controller
 
         $subtotal = $credit_note->creditItems->first()->subtotal ?? 0;
 
+        // Get classification list
+        $classifications = Classification::select('id', 'classification_code', 'description')->where('status', '0')->get();
+
         $reasons = Selections::select('id', 'selection_data')
             ->where('selection_type', 'credit_reason')
             ->where('status', '0')
             ->get();
 
-            // Get customer list
+        // Get customer list
         $customers = Customer::select('customer_name')->where('status', '0')->get()->pluck('customer_name');
 
         $taxes = Taxes::select('id', 'tax_type', 'tax_code', 'tax_rate')->where('status', '0')->get();
@@ -370,24 +374,24 @@ class CreditNoteController extends Controller
             ->get();
         $ro = '';
 
-        return view('credit_notes.show', compact('credit_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'ro'));
+        return view('credit_notes.show', compact('credit_note', 'subtotal', 'reasons', 'customers', 'states', 'taxes', 'classifications', 'ro'));
     }
 
     public function destroy($id)
     {
         try {
             $credit_note = CreditNote::findOrFail($id);
-            
+
             // Update status to deleted (soft delete)
             $credit_note->update(['status' => '1']);
-            
+
             // Also mark credit items as deleted if any exist
             if ($credit_note->creditItems()->count() > 0) {
                 $credit_note->creditItems()->update(['status' => '1']);
             }
-            
+
             Alert::toast('Credit note deleted successfully', 'success');
-            
+
             // Return direct response for AJAX requests
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
@@ -396,20 +400,20 @@ class CreditNoteController extends Controller
                     'redirect' => route('credit_notes.index')
                 ]);
             }
-            
+
             return redirect()->route('credit_notes.index');
         } catch (\Exception $e) {
             Log::error('Credit Note deletion error: ' . $e->getMessage());
-            
+
             Alert::toast('Error deleting credit note', 'error');
-            
+
             if (request()->ajax() || request()->wantsJson()) {
                 return response()->json([
                     'success' => false,
                     'message' => 'Error deleting credit note'
                 ], 500);
             }
-            
+
             return back()->withErrors(['error' => 'An unexpected error occurred. Please try again.']);
         }
     }

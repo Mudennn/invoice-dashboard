@@ -227,13 +227,14 @@
                     <th scope="col" style="width: 40%;">Description</th>
                     <th scope="col" style="width: 10%;">Unit Price</th>
                     <th scope="col" style="width: 10%;">Amount</th>
+                    <th scope="col" style="width: 10%;">Classification</th>
                     <th scope="col" style="width: 10%;">Tax</th>
                     <th scope="col" style="width: 5%;"></th>
                 </tr>
             </thead>
             <tbody id="invoice-items-body">
-                @if(isset($debit_note->debit_note_items) && count($debit_note->debit_note_items) > 0)
-                    @foreach($debit_note->debit_note_items as $index => $item)
+                @if(isset($debit_note->debitItems) && count($debit_note->debitItems) > 0)
+                    @foreach($debit_note->debitItems as $index => $item)
                     <tr class="invoice-item-row">
                         <td class="text-center">{{ $index + 1 }}</td>
                         <td>
@@ -251,6 +252,18 @@
                             <input type="hidden" name="items[{{ $index }}][total]" class="item-total" value="{{ $item->total }}">
                         </td>
                         <td>
+                            <select name="items[{{ $index }}][classification_code]"
+                                class="form-control item-classification" {{ $ro }}>
+                                <option value=""> {{ 'Choose :' }}</option>
+                                @foreach ($classifications as $classification)
+                                    <option value="{{ $classification->classification_code }}"
+                                        {{ $item->classification_code == $classification->classification_code ? 'selected' : '' }}>
+                                        {{ $classification->classification_code }} -
+                                        {{ $classification->description }}</option>
+                                @endforeach
+                            </select>
+                        </td>
+                        <td>
                             <select name="items[{{ $index }}][tax_type]" class="form-control item-tax"
                             {{ $ro }}>
                             <option value=""> {{ 'Choose :' }}</option>
@@ -263,6 +276,8 @@
                             @endforeach
                         </select>
                         <input type="hidden" name="items[{{ $index }}][tax_code]" class="item-tax-code" value="{{ $item->tax_code ?? '' }}">
+                        <input type="hidden" name="items[{{ $index }}][tax_rate]" class="item-tax-rate" value="{{ $item->tax_rate ?? 0 }}">
+                        <input type="hidden" name="items[{{ $index }}][tax_amount]" class="item-tax-amount" value="{{ $item->tax_amount ?? 0 }}">
                         </td>
                         <td class="text-center">
                             <button type="button" class="delete-icon-button remove-item" {{ $ro }}>
