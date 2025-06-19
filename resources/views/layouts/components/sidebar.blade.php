@@ -44,9 +44,20 @@
                 ['text' => 'Taxes', 'route' => 'taxes.index'],
                 ['text' => 'Classifications', 'route' => 'classifications.index'],
                 ['text' => 'MSICs', 'route' => 'msics.index'],
+                ['text' => 'Admin Management', 'route' => 'admins.index'],
             ],
         ],
     ];
+    
+   
+    // if (Auth::check()) {
+    //     $menuItems[] = [
+    //         'icon' => 'admin_panel_settings',
+    //         'text' => 'Admin Management',
+    //         'route' => 'admins.index',
+    //         'active' => request()->routeIs('admins.*'),
+    //     ];
+    // }
 @endphp
 
 <aside class="sidebar" id="sidebar">
@@ -100,12 +111,13 @@
         <div class="position-relative dropup">
             <div class="profile-toggle" id="userProfileToggle" data-bs-toggle="dropdown" aria-expanded="false">
                 <div class="profile-img">
-                    <img src="https://ui-avatars.com/api/?name=Jane+Doeson&background=2563EB&color=fff" alt="User"
+                    <img src="https://ui-avatars.com/api/?name={{ Auth::user()->name }}&background=2563EB&color=fff" alt="User"
                         class="rounded-circle">
                 </div>
                 <div class="profile-info" id="userInfo">
-                    <div class="profile-name">Jane Doeson</div>
-                    <div class="profile-email">janedoeson@gmail.com</div>
+                        <div class="profile-name">{{ Auth::user()->name }}</div>
+                        <div class="profile-email">{{ Auth::user()->email }}</div>
+                        <div class="profile-role badge bg-primary">{{ ucfirst(str_replace('_', ' ', Auth::user()->role)) }}</div>
                 </div>
                 <span class="material-symbols-outlined arrow-icon" id="userDropdownArrow">expand_more</span>
             </div>
@@ -117,11 +129,14 @@
                         Company Profile
                     </div>
                 </a>
-                <a class="dropdown-item text-danger" style="--index: 2;">
+                <a class="dropdown-item text-danger" style="--index: 2;" href="{{ route('logout') }}" onclick="event.preventDefault(); document.getElementById('logout-form').submit();">
                     <div class="d-flex align-items-center">
                         <span class="material-symbols-outlined me-2">logout</span>
                         Logout
                     </div>
+                    <form id="logout-form" action="{{ route('logout') }}" method="POST" class="d-none">
+                        @csrf
+                    </form>
                 </a>
             </div>
         </div>

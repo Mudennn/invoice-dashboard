@@ -8,7 +8,7 @@
 
     <link href="https://fonts.googleapis.com/icon?family=Material+Symbols+Outlined" rel="stylesheet" />
 
-    @vite(['resources/sass/app.scss', 'resources/js/app.js', 'resources/css/app.css'])
+    @vite(['resources/sass/app.scss', 'resources/js/app.js'])
 
     @include('layouts.styles.index')
     @include('layouts.styles.tables')

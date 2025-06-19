@@ -114,6 +114,35 @@
         border-top: 1px solid var(--border);
     }
 
+    .input-group{
+        flex-wrap: nowrap !important;
+    }
+
+    .form-controll{
+        padding: 8px 12px !important;
+        border: 1px solid #ddd !important;
+        border-radius: 8px 0 0 8px !important;
+        background-color: var(--bg-screen) !important;
+        font-size: 0.875rem !important;
+        width: 100% !important;
+    }
+
+    .form-controll:focus {
+        border: 1px solid var(--primary) !important;
+        /* border-color: var(--main-color);  */
+        outline: none !important;
+        box-shadow: none !important;
+    }
+
+    .btn-outline-secondary{
+        border: 1px solid #ddd !important;
+    }
+
+    .btn-outline-secondary:hover{
+        background-color: var(--primary) !important;
+        color: white !important;
+    }
+
     /* PHONE MEDIA QUERY */
     @media only screen and (max-width: 767px) {
         .row-form {

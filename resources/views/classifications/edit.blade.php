@@ -1,8 +1,6 @@
-@extends('layouts.dashboard', ['title' => 'Edit Classification #' . $classification->classification_code])
+@extends('layouts.dashboard' , ['title' => 'Edit Classification #' . $classification->classification_code])
 
 @section('content')
-
-<div class="form-container pt-4 px-4">
     <div>
         <div class="d-flex flex-column gap-2 form-header-container">
             <a href="{{ url()->previous() }}" class="back-button mb-4">
@@ -24,5 +22,4 @@
             </div>
         </form>
     </div>
-</div>
 @endsection
