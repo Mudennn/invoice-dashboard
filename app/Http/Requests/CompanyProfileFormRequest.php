@@ -33,6 +33,8 @@ class CompanyProfileFormRequest extends FormRequest
             'email'  => 'nullable | string',
             'phone'  => 'nullable | string',
             'is_image'  => 'nullable | image | mimes:jpeg,png,jpg,gif | max:2048',
+            'msic_code'  => 'nullable | string',
+            'company_description'  => 'nullable | string',
             'registration_type'  => 'nullable | string',
             'tin'  => 'nullable | string',
             'sst_registration_no'  => 'nullable | string',

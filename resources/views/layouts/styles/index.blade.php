@@ -195,7 +195,7 @@
 
     .delete-icon-button {
         background-color: var(--destructive) !important;
-        padding: 4px!important;
+        padding: 4px !important;
         border-radius: 50px !important;
         font-weight: 400 !important;
         color: white !important;
@@ -214,13 +214,17 @@
         --bs-btn-border-color: var(--primary) !important;
     }
 
-    .btn-check:checked + .btn, :not(.btn-check) + .btn:active, .btn:first-child:active, .btn.active, .btn.show {
+    .btn-check:checked+.btn,
+    :not(.btn-check)+.btn:active,
+    .btn:first-child:active,
+    .btn.active,
+    .btn.show {
         background-color: var(--primary) !important;
         border-color: var(--primary) !important;
         color: white !important;
     }
 
-     /* -------------------------------------------------------------- */
+    /* -------------------------------------------------------------- */
     /* SWEETALERT */
 
     .swal2-popup.swal2-toast.swal2-icon-success {
@@ -282,7 +286,7 @@
     /* -------------------------------------------------------------- */
 
     /* SELECT2 */
-    .select2-container--default .select2-selection--single{
+    .select2-container--default .select2-selection--single {
         padding: 6px !important;
         border: 1px solid #ddd !important;
         border-radius: 8px !important;
@@ -291,14 +295,35 @@
         font-size: 0.875rem !important;
         height: 42px !important;
     }
-    .select2-container--default .select2-selection--single .select2-selection__arrow{
+
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
         top: 50% !important;
         transform: translateY(-50%) !important;
     }
 
-    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{
+    .select2-container--default .select2-results__option--highlighted.select2-results__option--selectable {
         background-color: var(--primary) !important;
     }
+
+    /* Custom styles for select2 dropdown options */
+    /* Specific styling for classification dropdown */
+    /* #select2-items0classification_code-7p-results .select2-results__option,
+    .item-classification+.select2-container--default .select2-results__option {
+        font-size: 12px !important;
+    }
+
+    
+    #select2-items0tax_type-t37q-results .select2-results__option,
+    .item-tax+.select2-container--default .select2-results__option {
+        font-size: 12px !important;
+    } */
+
+    /* Target all item classification and tax select2 results with wildcard */
+    [id^="select2-items"][id*="classification_code"][id$="-results"] .select2-results__option,
+    [id^="select2-items"][id*="tax_type"][id$="-results"] .select2-results__option {
+        font-size: 12px !important;
+    }
+
     /* -------------------------------------------------------------- */
 
     /* Mobile styles */

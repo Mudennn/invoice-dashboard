@@ -178,7 +178,7 @@
             <!-- Second Contact (Initially hidden if no data) -->
             <div id="contact-person-2" class="contact-person mb-3" style="{{ $customer_profile->contact_name_2 ? '' : 'display: none;' }}">
                 <hr>
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center mt-3">
                     <h5>Secondary Contact</h5>
                     <button type="button" class="btn btn-sm btn-danger remove-contact" data-contact="2">Remove</button>
                 </div>
@@ -217,7 +217,7 @@
             <!-- Third Contact (Initially hidden if no data) -->
             <div id="contact-person-3" class="contact-person mb-3" style="{{ $customer_profile->contact_name_3 ? '' : 'display: none;' }}">
                 <hr>
-                <div class="d-flex justify-content-between align-items-center">
+                <div class="d-flex justify-content-between align-items-center mt-3">
                     <h5>Additional Contact</h5>
                     <button type="button" class="btn btn-sm btn-danger remove-contact" data-contact="3">Remove</button>
                 </div>
@@ -345,9 +345,60 @@
     </div>
 </div>
 
+<hr>
+
+{{-- Details Information --}}
+<div class="input-form form-input-container">
+    <div class="d-flex flex-column gap-2 mb-4">
+        <h3>Details Information</h3>
+        <p class="sub-text">Details information for the contact</p>
+    </div>
+
+    <div class="input-container">
+        <div class="left-container">
+            <div class="d-flex flex-column flex-md-row gap-4 w-100">
+                <div class="w-100">
+                    <label for="msic_code" class="form-lable">MSIC Code</label>
+                    <select name="msic_code" id="msic_code" class="form-control form-select msic-select-input" {{ $ro }}>
+                        <option value=""> {{ 'Choose :' }}</option>
+                        @foreach ($msics as $msic)
+                            @if ($customer_profile->msic_code)
+                                <option value="{{ $msic->id }}" {{ $msic->id == $customer_profile->msic_code ? 'selected' : '' }}>
+                                    {{ $msic->msic_code }} - {{ $msic->description }}</option>
+                            @else
+                                <option value="{{ $msic->id }}" {{ $msic->id == old('msic_code') ? 'selected' : '' }}>
+                                    {{ $msic->msic_code }} - {{ $msic->description }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+    
+                    @error('msic_code')
+                        <span class="text-danger font-weight-bold small"># {{ $message }}</span>
+                    @enderror
+    
+                </div>
+    
+                <div class="w-100">
+                    <label for="company_description" class="form-lable">Company Description</label>
+                    <textarea name="company_description" id="company_description" cols="30" rows="10" class="form-control" {{ $ro }}>{{ $customer_profile->company_description }}</textarea>
+    
+                    @error('company_description')
+                        <span class="text-danger font-weight-bold small"># {{ $message }}</span>
+                    @enderror
+                </div>
+            </div>
+        </div>
+        <div class="right-container"></div>
+    </div>
+</div>
+
 @push('scripts')
 <script>
     document.addEventListener('DOMContentLoaded', function() {
+
+        // initialize Select2 for msic code
+        $('#msic_code').select2();
+
         const addContactBtn = document.getElementById('add-contact-btn');
         const contactPerson2 = document.getElementById('contact-person-2');
         const contactPerson3 = document.getElementById('contact-person-3');

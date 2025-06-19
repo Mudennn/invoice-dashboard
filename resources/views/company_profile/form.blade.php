@@ -240,7 +240,8 @@
 </div>
 
 <hr>
-{{-- Address Information --}}
+
+{{-- Company Logo --}}
 <div class="input-form form-input-container">
     <div class="d-flex flex-column gap-2 mb-4">
         <h3>Company Logo</h3>
@@ -259,6 +260,53 @@
                 @endif
                 <input type="file" name="is_image" value="{{ old('is_image') ?? $company_profile->is_image }}"
                     class="form-control" {{ $ro }}>
+            </div>
+        </div>
+        <div class="right-container"></div>
+    </div>
+</div>
+
+<hr>
+
+{{-- Details Information --}}
+<div class="input-form form-input-container">
+    <div class="d-flex flex-column gap-2 mb-4">
+        <h3>Details Information</h3>
+        <p class="sub-text">Details information for the contact</p>
+    </div>
+
+    <div class="input-container">
+        <div class="left-container">
+            <div class="d-flex flex-column flex-md-row gap-4 w-100">
+                <div class="w-100">
+                    <label for="msic_code" class="form-lable">MSIC Code</label>
+                    <select name="msic_code" id="msic_code" class="form-control form-select msic-select-input" {{ $ro }}>
+                        <option value=""> {{ 'Choose :' }}</option>
+                        @foreach ($msics as $msic)
+                            @if ($company_profile->msic_code)
+                                <option value="{{ $msic->id }}" {{ $msic->id == $company_profile->msic_code ? 'selected' : '' }}>
+                                    {{ $msic->msic_code }} - {{ $msic->description }}</option>
+                            @else
+                                <option value="{{ $msic->id }}" {{ $msic->id == old('msic_code') ? 'selected' : '' }}>
+                                    {{ $msic->msic_code }} - {{ $msic->description }}</option>
+                            @endif
+                        @endforeach
+                    </select>
+    
+                    @error('msic_code')
+                        <span class="text-danger font-weight-bold small"># {{ $message }}</span>
+                    @enderror
+    
+                </div>
+    
+                <div class="w-100">
+                    <label for="company_description" class="form-lable">Company Description</label>
+                    <textarea name="company_description" id="company_description" cols="30" rows="10" class="form-control" {{ $ro }}>{{ $company_profile->company_description }}</textarea>
+    
+                    @error('company_description')
+                        <span class="text-danger font-weight-bold small"># {{ $message }}</span>
+                    @enderror
+                </div>
             </div>
         </div>
         <div class="right-container"></div>

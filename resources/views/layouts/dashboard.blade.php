@@ -46,6 +46,7 @@
         });
     </script>
     @include('sweetalert::alert')
+    @include('layouts.js.invoice-forms')
     @stack('scripts')
 </body>
 

@@ -43,6 +43,7 @@
             'submenu' => [
                 ['text' => 'Taxes', 'route' => 'taxes.index'],
                 ['text' => 'Classifications', 'route' => 'classifications.index'],
+                ['text' => 'MSICs', 'route' => 'msics.index'],
             ],
         ],
     ];
@@ -56,6 +57,7 @@
 
     <!-- Logo -->
     <div class="logo">
+        {{-- <img src="{{ asset('images/logo.png') }}" alt="Future Tech Resources" class="logo-img"> --}}
         <span class="logo-text" id="logoText">E-Invoice</span>
         <span class="logo-icon" id="logoIcon">E</span>
     </div>

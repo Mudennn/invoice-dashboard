@@ -8,6 +8,7 @@ use App\Models\Selections;
 use App\Http\Requests\CompanyProfileFormRequest;
 use Illuminate\Support\Facades\DB;
 use RealRashid\SweetAlert\Facades\Alert;
+use App\Models\Msic;
 
 class CompanyProfileController extends Controller
 {
@@ -46,10 +47,10 @@ class CompanyProfileController extends Controller
         
         $company_profile = new CompanyProfile();
     	$states = Selections::select('id', 'selection_data')->where('selection_type', 'state')->where('status', '0')->get();
-         
+        $msics = Msic::select('id', 'msic_code', 'description')->where('status', '0')->get();
         $ro = ''; 
         
-        return view('company_profile.create', compact('company_profile', 'states', 'ro'));
+        return view('company_profile.create', compact('company_profile', 'states', 'msics', 'ro'));
     }
     
     public function store(CompanyProfileFormRequest $request)
@@ -71,6 +72,8 @@ class CompanyProfileController extends Controller
                  'country'  => $request->country,
                  'email'  => $request->email,
                  'phone'  => $request->phone,
+                 'msic_code'  => $request->msic_code,
+                 'company_description'  => $request->company_description,
                  'tin'  => $request->tin,
                  'registration_type'  => $request->registration_type,
                  'sst_registration_no'  => $request->sst_registration_no,
@@ -114,10 +117,10 @@ class CompanyProfileController extends Controller
     {
         $company_profile = CompanyProfile::findOrFail($id);
     	$states = Selections::select('id', 'selection_data')->where('selection_type', 'state')->where('status', '0')->get();
-         
+        $msics = Msic::select('id', 'msic_code', 'description')->where('status', '0')->get();
         $ro = ''; 
         
-        return view('company_profile.edit', compact('company_profile', 'states', 'ro'));
+        return view('company_profile.edit', compact('company_profile', 'states', 'msics', 'ro'));
     }
     
     public function update(CompanyProfileFormRequest $request, $id)
@@ -139,6 +142,8 @@ class CompanyProfileController extends Controller
                  'country'  => $request->country,
                  'email'  => $request->email,
                  'phone'  => $request->phone,
+                 'msic_code'  => $request->msic_code,
+                 'company_description'  => $request->company_description,
                  'registration_type'  => $request->registration_type,
                  'tin'  => $request->tin,
                  'sst_registration_no'  => $request->sst_registration_no,

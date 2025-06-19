@@ -7,6 +7,7 @@ use App\Models\Customer;
 use App\Models\Selections;
 use RealRashid\SweetAlert\Facades\Alert;
 use App\Http\Requests\CustomerFormRequest;
+use App\Models\Msic;
 
 class CustomerController extends Controller
 {
@@ -35,10 +36,10 @@ class CustomerController extends Controller
     {
         $customer_profile = new Customer();
         $states = Selections::select('id', 'selection_data')->where('selection_type', 'state')->where('status', '0')->get();
-
+        $msics = Msic::select('id', 'msic_code', 'description')->where('status', '0')->get();
         $ro = '';
 
-        return view('contacts.create', compact('customer_profile', 'states', 'ro'));
+        return view('contacts.create', compact('customer_profile', 'states', 'msics', 'ro'));
     }
 
     public function store(CustomerFormRequest $request)
@@ -70,6 +71,8 @@ class CustomerController extends Controller
                 'contact_name_3'  => $request->contact_name_3,
                 'contact_3'  => $request->contact_3,
                 'email_3'  => $request->email_3,
+                'msic_code'  => $request->msic_code,
+                'company_description'  => $request->company_description,
                 'status' => '0',
                 // 'created_by' => $user->id,
                 // 'updated_by' => $user->id,
@@ -102,9 +105,10 @@ class CustomerController extends Controller
     {
         $customer_profile = Customer::findOrFail($id);
         $states = Selections::select('id', 'selection_data')->where('selection_type', 'state')->where('status', '0')->get();
-        $ro = '';
+        $msics = Msic::select('id', 'msic_code', 'description')->where('status', '0')->get();
+        $ro = '';   
 
-        return view('contacts.edit', compact('customer_profile', 'states', 'ro'));
+        return view('contacts.edit', compact('customer_profile', 'states', 'msics', 'ro'));
     }
 
     public function update(CustomerFormRequest $request, $id)
@@ -138,6 +142,8 @@ class CustomerController extends Controller
                 'contact_name_3'  => $request->contact_name_3,
                 'contact_3'  => $request->contact_3,
                 'email_3'  => $request->email_3,
+                'msic_code'  => $request->msic_code,
+                'company_description'  => $request->company_description,
                 // 'updated_by' => $user->id,
             ]);
 

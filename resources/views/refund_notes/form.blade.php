@@ -341,8 +341,6 @@
     </div>
 </div>
 
-<script src="{{ asset('js/invoice-forms.js') }}"></script>
-
 <!-- Invoice Selection Modal -->
 <div class="modal fade" id="invoiceSelectionModal" tabindex="-1" aria-labelledby="invoiceSelectionModalLabel" aria-hidden="true">
     <div class="modal-dialog modal-lg modal-dialog-centered">

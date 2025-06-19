@@ -105,6 +105,25 @@
                 </div>
 
             </div>
+           
+            <div class="address-information">
+                <h3>Details Information</h3>
+                <div class="address-information-details">
+                    <div class="address-postcode-container">
+
+                        <div class="address-detail">
+                            <h4>MSIC Code</h4>
+                            <p>{{ $company_profile->msic_code }} - {{ $company_profile->msic->description }}</p>
+                        </div>
+
+                        <div class="postcode-detail">
+                            <h4>Company Description</h4>
+                            <p>{{ $company_profile->company_description }}</p>
+                        </div>
+                    </div>
+                </div>
+
+            </div>
         </div>
     </div>
 @endsection

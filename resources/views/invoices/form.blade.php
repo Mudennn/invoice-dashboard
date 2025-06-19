@@ -272,12 +272,12 @@
                             <td>
                                 <select name="items[{{ $index }}][tax_type]" class="form-control item-tax"
                                     {{ $ro }}>
-                                    <option value=""> {{ 'Choose :' }}</option>
+                                    <option value="" > {{ 'Choose :' }}</option>
                                     @foreach ($taxes as $tax)
                                         <option value="{{ $tax->tax_type }}" data-tax-code="{{ $tax->tax_code }}"
                                             data-tax-rate="{{ $tax->tax_rate }}"
                                             {{ $item->tax_type == $tax->tax_type ? 'selected' : '' }}>
-                                            {{ $tax->tax_code }} - {{ $tax->tax_type }} ({{ $tax->tax_rate }}%)
+                                            {{ $tax->tax_code }} - {{ $tax->tax_type }} ({{ $tax->tax_rate }}%) 
                                         </option>
                                     @endforeach
                                 </select>
@@ -350,4 +350,4 @@
     </div>
 </div>
 
-<script src="{{ asset('js/invoice-forms.js') }}"></script>
+{{-- <script src="{{ asset('js/invoice-forms.js') }}"></script> --}}

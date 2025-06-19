@@ -45,6 +45,8 @@ class CustomerFormRequest extends FormRequest
             // 'contact_name_3' => 'nullable|string|max:255',
             // 'contact_3' => 'nullable|string|max:50',
             // 'email_3' => 'nullable|email|max:255',
+            'msic_code'  => 'nullable | string',
+            'company_description'  => 'nullable | string',
         ];
     }
 }

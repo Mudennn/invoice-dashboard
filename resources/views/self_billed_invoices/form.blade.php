@@ -340,5 +340,4 @@
     </div>
 </div>
 
-<script src="{{ asset('js/invoice-forms.js') }}"></script>
     

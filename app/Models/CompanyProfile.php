@@ -14,7 +14,7 @@ class CompanyProfile extends Model implements HasMedia
 
     protected $primaryKey = 'id';
 
-    protected $fillable = ['company_name', 'other_name', 'address_line_1', 'address_line_2', 'state', 'city', 'postcode', 'country', 'email', 'phone', 'is_image', 'registration_type', 'tin', 'sst_registration_no', 'registration_no', 'old_registration_no', 'status', 'created_by', 'updated_by'];
+    protected $fillable = ['company_name', 'other_name', 'address_line_1', 'address_line_2', 'state', 'city', 'postcode', 'country', 'email', 'phone', 'is_image', 'msic_code', 'company_description', 'registration_type', 'tin', 'sst_registration_no', 'registration_no', 'old_registration_no', 'status', 'created_by', 'updated_by'];
 
     // Update profile picture
     public function updateProfilePicture($id, $status)
@@ -37,5 +37,10 @@ class CompanyProfile extends Model implements HasMedia
         ];
 
         return $types[$this->registration_type] ?? $this->registration_type;
+    }
+
+    public function msic()
+    {
+        return $this->belongsTo(Msic::class, 'msic_code', 'id');
     }
 }
