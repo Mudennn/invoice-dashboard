@@ -224,7 +224,7 @@
                 <tr>
                     <th scope="col" class="text-center" style="width: 5%;">No</th>
                     <th scope="col" style="width: 10%;">Quantity</th>
-                    <th scope="col" style="width: 40%;">Description</th>
+                    <th scope="col" style="width: 20%;">Description</th>
                     <th scope="col" style="width: 10%;">Unit Price</th>
                     <th scope="col" style="width: 10%;">Amount</th>
                     <th scope="col" style="width: 10%;">Classification</th>

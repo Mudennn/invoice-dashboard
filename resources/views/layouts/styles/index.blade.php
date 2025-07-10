@@ -149,6 +149,7 @@
     .primary-button {
         background: linear-gradient(to top, var(--button-gradient-start), var(--button-gradient-end));
         padding: 2px 32px !important;
+        border: none !important;
         border-radius: 4px !important;
         font-weight: 400 !important;
         font-size: var(--sixteen) !important;
@@ -177,6 +178,7 @@
         background-color: var(--destructive) !important;
         padding: 2px 32px !important;
         border-radius: 4px !important;
+        border: none !important;
         font-weight: 400 !important;
         font-size: var(--sixteen) !important;
         transition: all 0.3s !important;
@@ -197,6 +199,7 @@
         background-color: var(--destructive) !important;
         padding: 4px !important;
         border-radius: 50px !important;
+        border: none !important;
         font-weight: 400 !important;
         color: white !important;
         font-size: var(--sixteen) !important;
@@ -322,6 +325,7 @@
     [id^="select2-items"][id*="classification_code"][id$="-results"] .select2-results__option,
     [id^="select2-items"][id*="tax_type"][id$="-results"] .select2-results__option {
         font-size: 12px !important;
+        scrollbar-width: none;
     }
 
     /* -------------------------------------------------------------- */

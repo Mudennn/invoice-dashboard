@@ -77,7 +77,7 @@
     }
 
     /* Tablet adjustments */
-    @media (min-width: 768px) and (max-width: 1024px) {
+    @media (min-width: 768px) and (max-width: 1440px) {
         .mobile-header {
             display: flex;
             align-items: center;
@@ -94,6 +94,10 @@
             z-index: 25;
             padding-top: 64px; /* Add padding to accommodate the header */
         }
+
+        aside.sidebar .logo {
+            display: none;
+        }
         
         aside.sidebar.open {
             transform: translateX(0);
@@ -104,7 +108,7 @@
         }
         
         .main-content {
-            margin-top: 64px !important; /* Add top margin for the mobile header */
+            margin-top: 80px !important; /* Add top margin for the mobile header */
         }
     }
 </style>

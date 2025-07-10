@@ -24,3 +24,8 @@ Homestead.yaml
 npm-debug.log
 Thumbs.db
 yarn-error.log
+
+einvoice_db.sql
+ACCOUNTING_ARCHITECTURE.md
+ACCOUNTING_TODO.md
+TODO.md
